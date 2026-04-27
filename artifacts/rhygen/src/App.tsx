@@ -7,7 +7,7 @@ import { Technology } from "./components/Technology";
 import { Market } from "./components/Market";
 import { Traction } from "./components/Traction";
 import { Roadmap } from "./components/Roadmap";
-import { BusinessModel } from "./components/BusinessModel";
+
 import { Team } from "./components/Team";
 import { Vision } from "./components/Vision";
 import { Contact } from "./components/Contact";
@@ -34,7 +34,7 @@ function App() {
         <Market />
         <Traction />
         <Roadmap />
-        <BusinessModel />
+
         <Team />
         <Vision />
         <Contact />
