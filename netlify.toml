@@ -1,0 +1,16 @@
+[build]
+  # Build the entire monorepo
+  command = "pnpm run build"
+  
+  # Tell Netlify to serve the frontend application
+  publish = "artifacts/rhygen/dist/public"
+
+[build.environment]
+  # Specify Node version
+  NODE_VERSION = "20"
+
+[[redirects]]
+  # This rule ensures that your Single Page App (React/Wouter) handles routing correctly
+  from = "/*"
+  to = "/index.html"
+  status = 200
