@@ -1,49 +1,163 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Float, ContactShadows, Html } from "@react-three/drei";
 
+// ───────────────────────── Procedural Wear Textures ─────────────────────────
+function makeWearTexture(
+  size = 512,
+  scratchCount = 220,
+  dirtCount = 60,
+  scratchAlpha = 0.35
+) {
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  // Base = white (full reflectivity / clean)
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, size, size);
+
+  // Subtle noise pass
+  const img = ctx.getImageData(0, 0, size, size);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const n = (Math.random() - 0.5) * 18;
+    img.data[i] = Math.max(0, Math.min(255, img.data[i] + n));
+    img.data[i + 1] = Math.max(0, Math.min(255, img.data[i + 1] + n));
+    img.data[i + 2] = Math.max(0, Math.min(255, img.data[i + 2] + n));
+  }
+  ctx.putImageData(img, 0, 0);
+
+  // Fine scratches
+  for (let i = 0; i < scratchCount; i++) {
+    ctx.strokeStyle = `rgba(60,60,60,${Math.random() * scratchAlpha})`;
+    ctx.lineWidth = Math.random() * 1.2 + 0.2;
+    ctx.beginPath();
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const len = Math.random() * 60 + 4;
+    const a = Math.random() * Math.PI * 2;
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+    ctx.stroke();
+  }
+
+  // Dirt blotches
+  for (let i = 0; i < dirtCount; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const r = Math.random() * 50 + 12;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, `rgba(70,55,40,${Math.random() * 0.45 + 0.1})`);
+    grad.addColorStop(1, "rgba(70,55,40,0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+function makeRoughnessMap(size = 512) {
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  // Base = mid-roughness
+  ctx.fillStyle = "#888";
+  ctx.fillRect(0, 0, size, size);
+
+  // Add noise
+  const img = ctx.getImageData(0, 0, size, size);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const n = (Math.random() - 0.5) * 80;
+    const v = Math.max(0, Math.min(255, img.data[i] + n));
+    img.data[i] = v;
+    img.data[i + 1] = v;
+    img.data[i + 2] = v;
+  }
+  ctx.putImageData(img, 0, 0);
+
+  // Add bright streaks (rougher zones = scuffs)
+  for (let i = 0; i < 180; i++) {
+    ctx.strokeStyle = `rgba(255,255,255,${Math.random() * 0.5})`;
+    ctx.lineWidth = Math.random() * 2 + 0.3;
+    ctx.beginPath();
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const len = Math.random() * 80 + 8;
+    const a = Math.random() * Math.PI * 2;
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+    ctx.stroke();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 8;
+  return tex;
+}
+
 // ───────────────────────── Materials ─────────────────────────
 function useMaterials() {
   return useMemo(() => {
+    const wearMap = makeWearTexture(512, 240, 70, 0.4);
+    const wearMapHeavy = makeWearTexture(512, 360, 110, 0.55);
+    const roughMap = makeRoughnessMap(512);
+
     const cabPaint = new THREE.MeshPhysicalMaterial({
       color: "#e8ecf4",
+      map: wearMap ?? undefined,
+      roughnessMap: roughMap ?? undefined,
       metalness: 0.55,
-      roughness: 0.32,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.1,
-      envMapIntensity: 1.2,
+      roughness: 0.42,
+      clearcoat: 0.95,
+      clearcoatRoughness: 0.18,
+      envMapIntensity: 1.3,
     });
     const accentPaint = new THREE.MeshPhysicalMaterial({
       color: "#5B4EE8",
+      map: wearMap ?? undefined,
       metalness: 0.5,
-      roughness: 0.3,
-      clearcoat: 1.0,
+      roughness: 0.35,
+      clearcoat: 0.9,
     });
     const chrome = new THREE.MeshPhysicalMaterial({
       color: "#f5f5f5",
       metalness: 1.0,
-      roughness: 0.06,
+      roughness: 0.08,
       clearcoat: 1.0,
     });
     const darkChassis = new THREE.MeshPhysicalMaterial({
       color: "#15181f",
+      map: wearMapHeavy ?? undefined,
+      roughnessMap: roughMap ?? undefined,
       metalness: 0.85,
-      roughness: 0.55,
+      roughness: 0.65,
     });
     const matteBlack = new THREE.MeshStandardMaterial({
       color: "#0b0b0d",
+      map: wearMapHeavy ?? undefined,
       metalness: 0.2,
       roughness: 0.95,
     });
     const tire = new THREE.MeshStandardMaterial({
       color: "#0a0a0c",
+      map: wearMapHeavy ?? undefined,
       roughness: 0.95,
       metalness: 0.0,
     });
     const tireWall = new THREE.MeshStandardMaterial({
       color: "#1a1a1d",
-      roughness: 0.9,
+      map: wearMapHeavy ?? undefined,
+      roughness: 0.92,
     });
     const glass = new THREE.MeshPhysicalMaterial({
       color: "#0a0e1a",
@@ -58,7 +172,7 @@ function useMaterials() {
     const headlight = new THREE.MeshPhysicalMaterial({
       color: "#ffffff",
       emissive: "#ffffe0",
-      emissiveIntensity: 1.4,
+      emissiveIntensity: 1.5,
       metalness: 0.0,
       roughness: 0.05,
       clearcoat: 1.0,
@@ -70,14 +184,16 @@ function useMaterials() {
     });
     const fuelTank = new THREE.MeshPhysicalMaterial({
       color: "#c8ccd4",
+      map: wearMap ?? undefined,
       metalness: 0.95,
-      roughness: 0.18,
+      roughness: 0.22,
       clearcoat: 0.6,
     });
     const aluminum = new THREE.MeshPhysicalMaterial({
       color: "#9aa0a8",
+      map: wearMap ?? undefined,
       metalness: 0.9,
-      roughness: 0.35,
+      roughness: 0.4,
     });
     const cyanGlow = new THREE.MeshStandardMaterial({
       color: "#00E5FF",
@@ -152,34 +268,31 @@ function Wheel({
 
   const Single = ({ x }: { x: number }) => (
     <group position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-      {/* Tire */}
       <mesh castShadow material={mats.tire}>
         <torusGeometry args={[tireR, tireW * 0.55, 16, 40]} />
       </mesh>
       <mesh castShadow material={mats.tireWall}>
         <cylinderGeometry args={[tireR, tireR, tireW, 40]} />
       </mesh>
-      {/* Hub */}
       <mesh castShadow material={mats.aluminum}>
         <cylinderGeometry args={[0.32, 0.32, tireW + 0.02, 32]} />
       </mesh>
-      {/* Bolt circle */}
       {[...Array(8)].map((_, i) => {
         const a = (i / 8) * Math.PI * 2;
         return (
           <mesh
             key={i}
-            position={[0, tireW / 2 + 0.005, 0]}
-            rotation={[Math.PI / 2, 0, 0]}
+            position={[
+              Math.cos(a) * 0.22,
+              0,
+              Math.sin(a) * 0.22,
+            ]}
+            material={mats.chrome}
           >
-            <cylinderGeometry args={[0.035, 0.035, 0.04, 12]} />
-            <primitive object={mats.chrome} attach="material" />
-            {/* relocate bolt around hub */}
-            <group position={[Math.cos(a) * 0.22, Math.sin(a) * 0.22, 0]} />
+            <cylinderGeometry args={[0.035, 0.035, tireW + 0.04, 12]} />
           </mesh>
         );
       })}
-      {/* Center cap */}
       <mesh material={mats.chrome}>
         <cylinderGeometry args={[0.1, 0.1, tireW + 0.04, 24]} />
       </mesh>
@@ -195,31 +308,128 @@ function Wheel({
   );
 }
 
-// ───────────────────────── Heavy Truck (Long-nose Indian style) ─────────────────────────
-function HeavyTruck({ mats }: { mats: Mats }) {
+// ───────────────────────── Hotspot ─────────────────────────
+export type PartId = "engine" | "battery" | "motor" | "hcu";
+
+function Hotspot({
+  position,
+  color,
+  label,
+  partId,
+  onClick,
+}: {
+  position: [number, number, number];
+  color: string;
+  label: string;
+  partId: PartId;
+  onClick?: (id: PartId) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const ringRef = useRef<THREE.Mesh>(null);
+  const dotRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (ringRef.current) {
+      const s = 1 + (Math.sin(t * 3) + 1) * 0.3;
+      ringRef.current.scale.setScalar(hovered ? 1.7 : s);
+      const m = ringRef.current.material as THREE.MeshBasicMaterial;
+      m.opacity = hovered ? 0.9 : 0.55 - (Math.sin(t * 3) + 1) * 0.18;
+    }
+    if (dotRef.current) {
+      dotRef.current.scale.setScalar(hovered ? 1.4 : 1);
+    }
+  });
+
+  return (
+    <group position={position}>
+      {/* Pulsing outer ring */}
+      <mesh ref={ringRef}>
+        <ringGeometry args={[0.11, 0.16, 32]} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.55}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+      {/* Solid dot (clickable) */}
+      <mesh
+        ref={dotRef}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          if (typeof document !== "undefined")
+            document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          if (typeof document !== "undefined")
+            document.body.style.cursor = "auto";
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.(partId);
+        }}
+      >
+        <sphereGeometry args={[0.09, 16, 16]} />
+        <meshBasicMaterial color={color} />
+      </mesh>
+      {/* Inner glow */}
+      <mesh>
+        <sphereGeometry args={[0.05, 16, 16]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+      {hovered && (
+        <Html center distanceFactor={9} position={[0, 0.35, 0]}>
+          <div
+            className="px-3 py-1.5 rounded-md text-[11px] font-bold whitespace-nowrap backdrop-blur-md border pointer-events-none"
+            style={{
+              background: "rgba(15,16,32,0.92)",
+              borderColor: color,
+              color,
+              boxShadow: `0 0 14px ${color}88`,
+            }}
+          >
+            {label} · click to learn
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+// ───────────────────────── Heavy Truck ─────────────────────────
+function HeavyTruck({
+  mats,
+  interactive,
+  onPartClick,
+}: {
+  mats: Mats;
+  interactive?: boolean;
+  onPartClick?: (id: PartId) => void;
+}) {
   return (
     <group>
-      {/* === CHASSIS LADDER FRAME === */}
+      {/* CHASSIS */}
       <mesh position={[0.7, -0.55, 0]} material={mats.darkChassis} castShadow>
         <boxGeometry args={[0.18, 0.24, 5.6]} />
       </mesh>
       <mesh position={[-0.7, -0.55, 0]} material={mats.darkChassis} castShadow>
         <boxGeometry args={[0.18, 0.24, 5.6]} />
       </mesh>
-      {/* Cross members */}
       {[-2.4, -1.2, 0, 1.2, 2.4].map((z) => (
         <mesh key={z} position={[0, -0.55, z]} material={mats.darkChassis}>
           <boxGeometry args={[1.5, 0.1, 0.15]} />
         </mesh>
       ))}
 
-      {/* === HOOD / BONNET === */}
+      {/* HOOD */}
       <group position={[0, 0.05, 2.05]}>
-        {/* Hood top */}
         <mesh material={mats.cabPaint} castShadow>
           <boxGeometry args={[1.85, 0.7, 1.4]} />
         </mesh>
-        {/* Hood front slope */}
         <mesh
           position={[0, -0.05, 0.72]}
           rotation={[-0.2, 0, 0]}
@@ -228,18 +438,16 @@ function HeavyTruck({ mats }: { mats: Mats }) {
         >
           <boxGeometry args={[1.85, 0.45, 0.4]} />
         </mesh>
-        {/* Hood ornament strip */}
         <mesh position={[0, 0.36, 0]} material={mats.chrome}>
           <boxGeometry args={[0.1, 0.04, 1.4]} />
         </mesh>
       </group>
 
-      {/* === GRILLE === */}
+      {/* GRILLE */}
       <group position={[0, -0.15, 2.78]}>
         <mesh material={mats.chrome} castShadow>
           <boxGeometry args={[1.7, 0.85, 0.08]} />
         </mesh>
-        {/* Vertical bars */}
         {[...Array(11)].map((_, i) => (
           <mesh
             key={i}
@@ -249,28 +457,20 @@ function HeavyTruck({ mats }: { mats: Mats }) {
             <boxGeometry args={[0.06, 0.78, 0.04]} />
           </mesh>
         ))}
-        {/* Brand plate */}
         <mesh position={[0, 0.5, 0.07]} material={mats.accentPaint}>
           <boxGeometry args={[0.55, 0.15, 0.04]} />
         </mesh>
       </group>
 
-      {/* === BUMPER === */}
-      <mesh
-        position={[0, -0.55, 2.95]}
-        material={mats.darkChassis}
-        castShadow
-      >
+      {/* BUMPER */}
+      <mesh position={[0, -0.55, 2.95]} material={mats.darkChassis} castShadow>
         <boxGeometry args={[2.1, 0.35, 0.18]} />
       </mesh>
-      <mesh
-        position={[0, -0.55, 2.95]}
-        material={mats.chrome}
-      >
+      <mesh position={[0, -0.55, 2.95]} material={mats.chrome}>
         <boxGeometry args={[2.12, 0.08, 0.2]} />
       </mesh>
 
-      {/* === HEADLIGHTS === */}
+      {/* HEADLIGHTS */}
       {[-0.7, 0.7].map((x) => (
         <group key={x} position={[x, -0.05, 2.82]}>
           <mesh material={mats.chrome}>
@@ -282,51 +482,40 @@ function HeavyTruck({ mats }: { mats: Mats }) {
         </group>
       ))}
 
-      {/* === FRONT FENDERS === */}
+      {/* FRONT FENDERS */}
       {[-1.0, 1.0].map((x) => (
         <mesh key={x} position={[x, -0.2, 2.05]} material={mats.cabPaint}>
           <boxGeometry args={[0.18, 0.7, 1.4]} />
         </mesh>
       ))}
 
-      {/* === CABIN === */}
+      {/* CABIN */}
       <group position={[0, 0.55, 1.05]}>
-        {/* Lower cab */}
         <mesh material={mats.cabPaint} castShadow>
           <boxGeometry args={[2.1, 1.6, 1.5]} />
         </mesh>
-        {/* Upper roof (slightly narrower) */}
-        <mesh
-          position={[0, 0.85, 0]}
-          material={mats.cabPaint}
-          castShadow
-        >
+        <mesh position={[0, 0.85, 0]} material={mats.cabPaint} castShadow>
           <boxGeometry args={[2.0, 0.15, 1.45]} />
         </mesh>
-        {/* Windshield */}
         <mesh position={[0, 0.4, 0.76]} rotation={[-0.18, 0, 0]} material={mats.glass}>
           <planeGeometry args={[1.85, 0.95]} />
         </mesh>
-        {/* Side windows */}
         <mesh position={[1.06, 0.35, 0]} rotation={[0, Math.PI / 2, 0]} material={mats.glass}>
           <planeGeometry args={[1.2, 0.7]} />
         </mesh>
         <mesh position={[-1.06, 0.35, 0]} rotation={[0, -Math.PI / 2, 0]} material={mats.glass}>
           <planeGeometry args={[1.2, 0.7]} />
         </mesh>
-        {/* Door lines */}
         {[-1.045, 1.045].map((x) => (
           <mesh key={x} position={[x, -0.15, 0]} material={mats.darkChassis}>
             <boxGeometry args={[0.005, 1.3, 0.01]} />
           </mesh>
         ))}
-        {/* Door handles */}
         {[-1.06, 1.06].map((x) => (
           <mesh key={x} position={[x, -0.1, -0.4]} material={mats.chrome}>
             <boxGeometry args={[0.02, 0.06, 0.18]} />
           </mesh>
         ))}
-        {/* Side mirrors on stalks */}
         {[-1.16, 1.16].map((x) => (
           <group key={x} position={[x, 0.45, 0.6]}>
             <mesh material={mats.chrome}>
@@ -337,7 +526,6 @@ function HeavyTruck({ mats }: { mats: Mats }) {
             </mesh>
           </group>
         ))}
-        {/* Cab steps */}
         {[-1.07, 1.07].map((x) => (
           <mesh key={x} position={[x, -1.0, -0.2]} material={mats.darkChassis}>
             <boxGeometry args={[0.12, 0.05, 0.45]} />
@@ -345,58 +533,51 @@ function HeavyTruck({ mats }: { mats: Mats }) {
         ))}
       </group>
 
-      {/* === SLEEPER EXTENSION === */}
+      {/* SLEEPER */}
       <group position={[0, 0.7, 0.0]}>
         <mesh material={mats.cabPaint} castShadow>
           <boxGeometry args={[2.1, 1.85, 0.6]} />
         </mesh>
-        {/* Rear sleeper window */}
         <mesh position={[0, 0.35, -0.31]} material={mats.glass}>
           <planeGeometry args={[1.4, 0.4]} />
         </mesh>
       </group>
 
-      {/* === EXHAUST STACK (vertical, behind cab) === */}
+      {/* EXHAUST STACK */}
       <group position={[1.05, 0.95, -0.45]}>
         <mesh material={mats.chrome} castShadow>
           <cylinderGeometry args={[0.085, 0.085, 2.4, 20]} />
         </mesh>
-        {/* Heat shield */}
         <mesh position={[0, 0, 0.08]} material={mats.darkChassis}>
           <boxGeometry args={[0.05, 1.6, 0.05]} />
         </mesh>
-        {/* Top cap */}
         <mesh position={[0, 1.2, 0]} material={mats.darkChassis}>
           <cylinderGeometry args={[0.1, 0.1, 0.06, 16]} />
         </mesh>
       </group>
 
-      {/* === FUEL TANKS (cylindrical, side mounted) === */}
+      {/* FUEL TANKS */}
       {[-0.95, 0.95].map((x) => (
         <group key={x} position={[x, -0.55, -0.6]}>
           <mesh rotation={[0, 0, Math.PI / 2]} material={mats.fuelTank} castShadow>
             <cylinderGeometry args={[0.32, 0.32, 1.4, 28]} />
           </mesh>
-          {/* Strap bands */}
           {[-0.45, 0.45].map((bz) => (
             <mesh key={bz} position={[0, 0, bz]} material={mats.darkChassis}>
               <torusGeometry args={[0.33, 0.02, 8, 24]} />
             </mesh>
           ))}
-          {/* Filler cap */}
           <mesh position={[0, 0.32, 0]} material={mats.chrome}>
             <cylinderGeometry args={[0.06, 0.06, 0.05, 16]} />
           </mesh>
         </group>
       ))}
 
-      {/* === CARGO CONTAINER BODY === */}
+      {/* CARGO */}
       <group position={[0, 0.35, -2.1]}>
-        {/* Main box */}
         <mesh material={mats.cabPaint} castShadow>
           <boxGeometry args={[2.4, 2.6, 3.2]} />
         </mesh>
-        {/* Corrugation strips on sides */}
         {[...Array(12)].map((_, i) => (
           <mesh
             key={i}
@@ -415,11 +596,9 @@ function HeavyTruck({ mats }: { mats: Mats }) {
             <boxGeometry args={[0.02, 2.5, 0.04]} />
           </mesh>
         ))}
-        {/* Top accent stripe */}
         <mesh position={[0, 1.1, 0]} material={mats.accentPaint}>
           <boxGeometry args={[2.42, 0.12, 3.22]} />
         </mesh>
-        {/* Rear doors with handles */}
         <mesh position={[0, 0, -1.61]} material={mats.cabPaint}>
           <boxGeometry args={[2.4, 2.6, 0.02]} />
         </mesh>
@@ -431,7 +610,6 @@ function HeavyTruck({ mats }: { mats: Mats }) {
             <boxGeometry args={[0.06, 1.2, 0.06]} />
           </mesh>
         ))}
-        {/* Tail lights */}
         {[-0.95, 0.95].map((x) => (
           <mesh key={x} position={[x, -1.05, -1.62]} material={mats.taillight}>
             <boxGeometry args={[0.4, 0.18, 0.02]} />
@@ -439,7 +617,7 @@ function HeavyTruck({ mats }: { mats: Mats }) {
         ))}
       </group>
 
-      {/* === MUDFLAPS === */}
+      {/* MUDFLAPS */}
       {[
         [-1.05, -0.85, 1.55],
         [1.05, -0.85, 1.55],
@@ -448,59 +626,77 @@ function HeavyTruck({ mats }: { mats: Mats }) {
         [-1.05, -0.85, -1.75],
         [1.05, -0.85, -1.75],
       ].map(([x, y, z], i) => (
-        <mesh
-          key={i}
-          position={[x, y, z]}
-          material={mats.matteBlack}
-        >
+        <mesh key={i} position={[x, y, z]} material={mats.matteBlack}>
           <boxGeometry args={[0.06, 0.6, 0.5]} />
         </mesh>
       ))}
 
-      {/* === WHEELS (2 front + 4 rear duals = 6 wheels visible) === */}
+      {/* WHEELS */}
       <Wheel position={[1.1, -0.7, 1.85]} mats={mats} />
       <Wheel position={[-1.1, -0.7, 1.85]} mats={mats} />
-      {/* Rear tandem axle (dual) */}
       <Wheel position={[1.05, -0.7, -1.25]} mats={mats} dual />
       <Wheel position={[-1.05, -0.7, -1.25]} mats={mats} dual />
       <Wheel position={[1.05, -0.7, -2.05]} mats={mats} dual />
       <Wheel position={[-1.05, -0.7, -2.05]} mats={mats} dual />
+
+      {/* ───── Interactive Hotspots ───── */}
+      {interactive && (
+        <>
+          <Hotspot
+            position={[0, 0.5, 2.05]}
+            color="#A0A8C0"
+            label="Diesel Engine"
+            partId="engine"
+            onClick={onPartClick}
+          />
+          <Hotspot
+            position={[0, -0.05, -1.0]}
+            color="#00E5FF"
+            label="Battery Pack"
+            partId="battery"
+            onClick={onPartClick}
+          />
+          <Hotspot
+            position={[0, -0.4, -2.0]}
+            color="#5B4EE8"
+            label="Electric Motor"
+            partId="motor"
+            onClick={onPartClick}
+          />
+          <Hotspot
+            position={[0, 1.6, 1.05]}
+            color="#ffffff"
+            label="AI Brain (HCU)"
+            partId="hcu"
+            onClick={onPartClick}
+          />
+        </>
+      )}
     </group>
   );
 }
 
 // ───────────────────────── Realistic Powertrain Parts ─────────────────────────
-
 function DieselEngine({ mats }: { mats: Mats }) {
   return (
     <group>
-      {/* Crankcase / block */}
       <mesh material={mats.aluminum} castShadow>
         <boxGeometry args={[1.6, 0.7, 0.85]} />
       </mesh>
-      {/* Oil pan */}
       <mesh position={[0, -0.45, 0]} material={mats.darkChassis} castShadow>
         <boxGeometry args={[1.4, 0.22, 0.7]} />
       </mesh>
-      {/* Cylinder head */}
       <mesh position={[0, 0.45, 0]} material={mats.aluminum} castShadow>
         <boxGeometry args={[1.55, 0.22, 0.78]} />
       </mesh>
-      {/* Valve cover */}
       <mesh position={[0, 0.62, 0]} material={mats.accentPaint} castShadow>
         <boxGeometry args={[1.45, 0.14, 0.65]} />
       </mesh>
-      {/* Cylinder bolts on valve cover */}
       {[...Array(6)].map((_, i) => (
-        <mesh
-          key={i}
-          position={[-0.6 + i * 0.24, 0.7, 0.32]}
-          material={mats.chrome}
-        >
+        <mesh key={i} position={[-0.6 + i * 0.24, 0.7, 0.32]} material={mats.chrome}>
           <cylinderGeometry args={[0.025, 0.025, 0.04, 8]} />
         </mesh>
       ))}
-      {/* 6 exhaust runners */}
       {[...Array(6)].map((_, i) => (
         <mesh
           key={`ex${i}`}
@@ -511,44 +707,31 @@ function DieselEngine({ mats }: { mats: Mats }) {
           <cylinderGeometry args={[0.06, 0.06, 0.18, 12]} />
         </mesh>
       ))}
-      {/* Exhaust manifold collector */}
       <mesh position={[0, 0.22, 0.62]} material={mats.darkChassis}>
         <boxGeometry args={[1.55, 0.16, 0.12]} />
       </mesh>
-      {/* Turbo */}
       <mesh position={[0.7, 0.15, 0.78]} material={mats.chrome} castShadow>
         <cylinderGeometry args={[0.18, 0.22, 0.22, 24]} />
       </mesh>
       <mesh position={[0.7, 0.45, 0.78]} material={mats.darkChassis}>
         <cylinderGeometry args={[0.08, 0.08, 0.4, 16]} />
       </mesh>
-      {/* Intake manifold */}
       <mesh position={[0, 0.32, -0.5]} material={mats.aluminum}>
         <boxGeometry args={[1.4, 0.18, 0.18]} />
       </mesh>
       {[...Array(6)].map((_, i) => (
-        <mesh
-          key={`in${i}`}
-          position={[-0.6 + i * 0.24, 0.4, -0.36]}
-          material={mats.aluminum}
-        >
+        <mesh key={`in${i}`} position={[-0.6 + i * 0.24, 0.4, -0.36]} material={mats.aluminum}>
           <cylinderGeometry args={[0.05, 0.05, 0.18, 10]} />
         </mesh>
       ))}
-      {/* Alternator + pulley */}
       <mesh position={[-0.85, 0.05, 0.4]} material={mats.aluminum} castShadow>
         <cylinderGeometry args={[0.16, 0.16, 0.18, 20]} />
       </mesh>
       <mesh position={[-0.85, 0.05, 0.5]} material={mats.matteBlack}>
         <cylinderGeometry args={[0.18, 0.18, 0.04, 20]} />
       </mesh>
-      {/* Fan */}
       <mesh position={[0, 0.05, 0.55]} material={mats.matteBlack}>
         <cylinderGeometry args={[0.32, 0.32, 0.04, 6]} />
-      </mesh>
-      {/* Belt */}
-      <mesh position={[-0.43, 0.05, 0.5]} rotation={[0, 0, 0.4]} material={mats.matteBlack}>
-        <torusGeometry args={[0.3, 0.015, 8, 24]} />
       </mesh>
     </group>
   );
@@ -559,15 +742,12 @@ function BatteryPack({ mats }: { mats: Mats }) {
   const cellsZ = 3;
   return (
     <group>
-      {/* Outer aluminum housing */}
       <mesh material={mats.aluminum} castShadow>
         <boxGeometry args={[2.8, 0.35, 1.8]} />
       </mesh>
-      {/* Top cover */}
       <mesh position={[0, 0.18, 0]} material={mats.darkChassis}>
         <boxGeometry args={[2.78, 0.04, 1.78]} />
       </mesh>
-      {/* Cell modules grid (visible from top) */}
       {[...Array(cellsX)].map((_, ix) =>
         [...Array(cellsZ)].map((_, iz) => {
           const x = -1.1 + ix * 0.55;
@@ -577,7 +757,6 @@ function BatteryPack({ mats }: { mats: Mats }) {
               <mesh material={mats.cyanGlow}>
                 <boxGeometry args={[0.45, 0.06, 0.45]} />
               </mesh>
-              {/* Terminal posts */}
               <mesh position={[-0.12, 0.05, 0]} material={mats.copper}>
                 <cylinderGeometry args={[0.025, 0.025, 0.05, 8]} />
               </mesh>
@@ -588,21 +767,14 @@ function BatteryPack({ mats }: { mats: Mats }) {
           );
         })
       )}
-      {/* HV connector box */}
       <mesh position={[1.5, 0.05, 0]} material={mats.orangeCable} castShadow>
         <boxGeometry args={[0.25, 0.25, 0.35]} />
       </mesh>
-      {/* Cooling fins on the side */}
       {[...Array(8)].map((_, i) => (
-        <mesh
-          key={i}
-          position={[-1.4 + i * 0.4, 0, 0.92]}
-          material={mats.aluminum}
-        >
+        <mesh key={i} position={[-1.4 + i * 0.4, 0, 0.92]} material={mats.aluminum}>
           <boxGeometry args={[0.04, 0.32, 0.06]} />
         </mesh>
       ))}
-      {/* Mounting brackets */}
       {[-1.3, 1.3].map((x) => (
         <mesh key={x} position={[x, -0.2, 0]} material={mats.darkChassis}>
           <boxGeometry args={[0.12, 0.08, 1.6]} />
@@ -615,11 +787,9 @@ function BatteryPack({ mats }: { mats: Mats }) {
 function ElectricMotor({ mats }: { mats: Mats }) {
   return (
     <group rotation={[0, 0, Math.PI / 2]}>
-      {/* Main motor body */}
       <mesh material={mats.violetGlow} castShadow>
         <cylinderGeometry args={[0.42, 0.42, 1.0, 32]} />
       </mesh>
-      {/* Cooling fins around body */}
       {[...Array(20)].map((_, i) => {
         const a = (i / 20) * Math.PI * 2;
         return (
@@ -633,14 +803,12 @@ function ElectricMotor({ mats }: { mats: Mats }) {
           </mesh>
         );
       })}
-      {/* End bells */}
       <mesh position={[0, 0.55, 0]} material={mats.aluminum}>
         <cylinderGeometry args={[0.46, 0.46, 0.12, 32]} />
       </mesh>
       <mesh position={[0, -0.55, 0]} material={mats.aluminum}>
         <cylinderGeometry args={[0.46, 0.46, 0.12, 32]} />
       </mesh>
-      {/* End-bell bolt circle */}
       {[...Array(8)].map((_, i) => {
         const a = (i / 8) * Math.PI * 2;
         return (
@@ -653,19 +821,15 @@ function ElectricMotor({ mats }: { mats: Mats }) {
           </mesh>
         );
       })}
-      {/* Output shaft */}
       <mesh position={[0, 0.78, 0]} material={mats.chrome}>
         <cylinderGeometry args={[0.1, 0.1, 0.4, 20]} />
       </mesh>
-      {/* Spline detail at shaft tip */}
       <mesh position={[0, 0.96, 0]} material={mats.darkChassis}>
         <cylinderGeometry args={[0.11, 0.11, 0.06, 12]} />
       </mesh>
-      {/* Phase cable junction */}
       <mesh position={[0.42, 0, 0]} material={mats.orangeCable} castShadow>
         <boxGeometry args={[0.18, 0.4, 0.18]} />
       </mesh>
-      {/* Three orange phase cables */}
       {[-0.1, 0, 0.1].map((y, i) => (
         <mesh key={i} position={[0.6, y, 0]} material={mats.orangeCable}>
           <cylinderGeometry args={[0.025, 0.025, 0.4, 12]} />
@@ -678,39 +842,28 @@ function ElectricMotor({ mats }: { mats: Mats }) {
 function HCUUnit({ mats }: { mats: Mats }) {
   return (
     <group>
-      {/* Aluminum case */}
       <mesh material={mats.aluminum} castShadow>
         <boxGeometry args={[0.85, 0.4, 0.6]} />
       </mesh>
-      {/* Heat sink fins on top */}
       {[...Array(14)].map((_, i) => (
-        <mesh
-          key={i}
-          position={[-0.38 + i * 0.058, 0.27, 0]}
-          material={mats.aluminum}
-        >
+        <mesh key={i} position={[-0.38 + i * 0.058, 0.27, 0]} material={mats.aluminum}>
           <boxGeometry args={[0.025, 0.14, 0.55]} />
         </mesh>
       ))}
-      {/* Mounting flange */}
       <mesh position={[0, -0.22, 0]} material={mats.darkChassis}>
         <boxGeometry args={[1.0, 0.04, 0.7]} />
       </mesh>
-      {/* Connector ports on front */}
       {[-0.25, 0, 0.25].map((x) => (
         <mesh key={x} position={[x, 0, 0.32]} material={mats.matteBlack}>
           <cylinderGeometry args={[0.06, 0.06, 0.04, 16]} />
         </mesh>
       ))}
-      {/* Status LED strip */}
       <mesh position={[0, 0.05, 0.31]} material={mats.led}>
         <boxGeometry args={[0.5, 0.025, 0.01]} />
       </mesh>
-      {/* Side label plate */}
       <mesh position={[0, 0.08, -0.31]} material={mats.accentPaint}>
         <boxGeometry args={[0.6, 0.18, 0.005]} />
       </mesh>
-      {/* Brand chip */}
       <mesh position={[0.3, 0, -0.31]} material={mats.pcb}>
         <boxGeometry args={[0.2, 0.18, 0.005]} />
       </mesh>
@@ -718,7 +871,6 @@ function HCUUnit({ mats }: { mats: Mats }) {
   );
 }
 
-// ───────────────────────── Animated wrappers w/ labels ─────────────────────────
 function PartGroup({
   visible,
   position,
@@ -768,8 +920,16 @@ function PartGroup({
   );
 }
 
-// ───────────────────────── Main exported component ─────────────────────────
-export function TruckModel({ exploded = false }: { exploded?: boolean }) {
+// ───────────────────────── Main ─────────────────────────
+export function TruckModel({
+  exploded = false,
+  interactive = false,
+  onPartClick,
+}: {
+  exploded?: boolean;
+  interactive?: boolean;
+  onPartClick?: (id: PartId) => void;
+}) {
   const mats = useMaterials();
   const group = useRef<THREE.Group>(null);
   const truckRef = useRef<THREE.Group>(null);
@@ -791,10 +951,13 @@ export function TruckModel({ exploded = false }: { exploded?: boolean }) {
     <Float speed={1.0} rotationIntensity={0.1} floatIntensity={exploded ? 0 : 0.35}>
       <group ref={group} scale={0.7}>
         <group ref={truckRef}>
-          <HeavyTruck mats={mats} />
+          <HeavyTruck
+            mats={mats}
+            interactive={interactive}
+            onPartClick={onPartClick}
+          />
         </group>
 
-        {/* Powertrain parts beneath the lifted truck */}
         <PartGroup
           visible={exploded}
           position={[0, -0.35, 1.1]}
@@ -803,7 +966,6 @@ export function TruckModel({ exploded = false }: { exploded?: boolean }) {
         >
           <DieselEngine mats={mats} />
         </PartGroup>
-
         <PartGroup
           visible={exploded}
           position={[0, -1.1, -0.6]}
@@ -812,7 +974,6 @@ export function TruckModel({ exploded = false }: { exploded?: boolean }) {
         >
           <BatteryPack mats={mats} />
         </PartGroup>
-
         <PartGroup
           visible={exploded}
           position={[0, -0.4, -1.9]}
@@ -821,7 +982,6 @@ export function TruckModel({ exploded = false }: { exploded?: boolean }) {
         >
           <ElectricMotor mats={mats} />
         </PartGroup>
-
         <PartGroup
           visible={exploded}
           position={[0, 0.6, 0.4]}

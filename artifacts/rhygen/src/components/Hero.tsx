@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
-import { TruckModel } from "./TruckModel";
+import { TruckModel, type PartId } from "./TruckModel";
 import { ParticleField } from "./ParticleField";
 import { SafeCanvas } from "./SafeCanvas";
+import { PartInfoModal } from "./PartInfoModal";
 
 export function Hero() {
   const { scrollY } = useScroll();
   const yBg = useTransform(scrollY, [0, 1000], [0, 200]);
+  const [openPart, setOpenPart] = useState<PartId | null>(null);
 
   return (
     <section className="relative min-h-[100dvh] w-full flex items-center pt-20 overflow-hidden bg-[#070710]">
@@ -131,20 +134,42 @@ export function Hero() {
                 </div>
               </div>
             }>
-              <Canvas camera={{ position: [5, 3, 10], fov: 45 }} gl={{ failIfMajorPerformanceCaveat: false, antialias: true }}>
-                <ambientLight intensity={0.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffffff" />
-                <pointLight position={[-10, -10, -5]} intensity={2} color="#00E5FF" />
-                <pointLight position={[10, 0, 0]} intensity={2} color="#5B4EE8" />
-                
+              <Canvas
+                camera={{ position: [5, 3, 10], fov: 45 }}
+                gl={{ failIfMajorPerformanceCaveat: false, antialias: true }}
+                shadows
+              >
+                <ambientLight intensity={0.45} />
+                <hemisphereLight args={["#bcd0ff", "#1a1530", 0.6]} />
+                <directionalLight
+                  position={[10, 10, 5]}
+                  intensity={1.6}
+                  color="#ffffff"
+                  castShadow
+                />
+                <pointLight position={[-10, -10, -5]} intensity={2.2} color="#00E5FF" />
+                <pointLight position={[10, 0, 0]} intensity={2.2} color="#5B4EE8" />
+                <spotLight
+                  position={[0, 8, 6]}
+                  intensity={1.2}
+                  angle={0.7}
+                  penumbra={0.6}
+                  color="#ffffff"
+                />
+
                 <ParticleField count={200} speed={0.3} radius={6} />
-                
-                <TruckModel />
+
+                <TruckModel
+                  interactive
+                  onPartClick={(id) => setOpenPart(id)}
+                />
               </Canvas>
             </SafeCanvas>
           </motion.div>
         </div>
       </div>
+
+      <PartInfoModal partId={openPart} onClose={() => setOpenPart(null)} />
     </section>
   );
 }
