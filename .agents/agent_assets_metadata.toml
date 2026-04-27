@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "J9Kh3NMMAa9xCqtyD6TBz"
+uri = "file://artifacts/rhygen/public/images/bench-prototype.png"
+type = "image"
+title = "bench prototype test rig"
+
+[[generated]]
+id = "8gH-0fk3quwoSio3kpW0v"
+uri = "file://artifacts/rhygen/public/images/hev-prototype.png"
+type = "image"
+title = "small commercial truck prototype"
