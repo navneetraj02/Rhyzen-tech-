@@ -20,6 +20,7 @@ export function Navbar({ onVoiceClick }: NavbarProps) {
 
   const navLinks = [
     { name: "Problem", href: "#problem" },
+    { name: "Impact", href: "#impact" },
     { name: "Solution", href: "#solution" },
     { name: "Technology", href: "#technology" },
     { name: "Market", href: "#market" },

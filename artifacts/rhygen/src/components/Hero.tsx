@@ -74,7 +74,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 1.1 }}
             className="text-[18px] md:text-[20px] text-[#A0A8C0] max-w-[480px] mb-10 leading-relaxed"
           >
-            Reducing emissions by 20–30%. Cutting fuel costs by half. No charging infrastructure required.
+            Cleaner air for our cities. More money for our drivers. A greener planet for our children. <span className="text-white">Built for the people who keep India moving.</span>
           </motion.p>
 
           <motion.div

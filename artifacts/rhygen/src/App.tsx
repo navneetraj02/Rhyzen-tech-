@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Hero } from "./components/Hero";
 import { Problem } from "./components/Problem";
+import { Impact } from "./components/Impact";
 import { Solution } from "./components/Solution";
 import { Technology } from "./components/Technology";
 import { Market } from "./components/Market";
@@ -27,6 +28,7 @@ function App() {
       <main className="w-full flex flex-col overflow-x-hidden">
         <Hero />
         <Problem />
+        <Impact />
         <Solution />
         <Technology />
         <Market />
