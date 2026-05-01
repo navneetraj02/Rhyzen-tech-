@@ -1,15 +1,29 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useRef, useEffect } from "react";
 import { SlideReveal, SectionReveal } from "./Reveal";
 
 export function Market() {
   const containerRef = useRef(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isInView = useInView(videoRef, { amount: 0.3 });
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"]
   });
 
   const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+
+  // Ensure video plays/pauses based on proximity (intersection)
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isInView) {
+        videoRef.current.play().catch(e => console.log("Video play blocked:", e));
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [isInView]);
 
   return (
     <section id="market" ref={containerRef} className="min-h-screen py-24 flex flex-col items-center justify-center pointer-events-none">
@@ -51,10 +65,12 @@ export function Market() {
               {/* Cinematic Video Container */}
               <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors z-10" />
               <video 
+                ref={videoRef}
                 autoPlay 
                 loop 
                 muted 
                 playsInline 
+                preload="auto"
                 className="w-full h-full object-cover rounded-2xl"
               >
                 <source src="/truckvideo.mp4" type="video/mp4" />
