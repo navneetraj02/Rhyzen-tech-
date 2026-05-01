@@ -38,8 +38,8 @@ function HybridDrivetrain() {
         </mesh>
 
         {/* Electric Drive Node */}
-        <mesh position={[1.5, 0.5, 0]}>
-          <cylinderGeometry args={[0.4, 0.4, 0.8, 32]} rotation={[0, 0, Math.PI / 2]} />
+        <mesh position={[1.5, 0.5, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.4, 0.4, 0.8, 32]} />
           <MeshDistortMaterial color="#00E5FF" speed={2} distort={0.2} emissive="#00E5FF" emissiveIntensity={1} />
         </mesh>
 
@@ -76,7 +76,7 @@ function Scene1() {
           metalness={0.9}
         />
       </mesh>
-      <gridHelper args={[100, 50, "#5B4EE8", "#070710"]} position={[0, -3.99, 0]} opacity={0.1} transparent />
+      <gridHelper args={[100, 50, "#5B4EE8", "#070710"]} position={[0, -3.99, 0]} />
     </group>
   );
 }
