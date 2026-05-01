@@ -1,30 +1,62 @@
-import { Linkedin, Mail } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function Footer() {
   return (
-    <footer className="h-[80px] bg-[#070710] border-t border-transparent relative flex items-center">
-      {/* Top Gradient Line */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#5B4EE8] to-transparent opacity-50" />
+    <footer className="py-20 border-t border-white/5 bg-[#070710] relative z-10 overflow-hidden">
       
-      <div className="container mx-auto px-6 max-w-[1440px] flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+      {/* Massive Background Branding - Optimized for Visibility */}
+      <div className="absolute inset-0 flex items-end justify-center pointer-events-none select-none overflow-hidden h-[500px]">
+        <motion.span 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="text-[25vw] leading-none font-black text-white/[0.03] tracking-[-0.05em] uppercase whitespace-nowrap"
+          style={{
+            maskImage: 'linear-gradient(to top, white 0%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to top, white 0%, transparent 100%)',
+          }}
+        >
+          RHYGEN
+        </motion.span>
         
-        <div className="text-[13px] text-[#A0A8C0] font-medium">
-          © 2026 Rhygen. Pre-incubated at SINE, IIT Bombay.
-        </div>
+        {/* Blurry Duplicate for the "Half Blur" effect */}
+        <motion.span 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 0.5, y: 0 }}
+          transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+          className="absolute text-[25vw] leading-none font-black text-white/[0.02] tracking-[-0.05em] uppercase whitespace-nowrap blur-xl"
+          style={{
+            maskImage: 'linear-gradient(to bottom, white 0%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, white 0%, transparent 100%)',
+          }}
+        >
+          RHYGEN
+        </motion.span>
+      </div>
 
-        <div className="text-[20px] font-[700] text-[#5B4EE8]">
-          R
-        </div>
+      <div className="container mx-auto px-6 max-w-[1440px] relative z-10">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12 pt-20">
+          <div className="flex flex-col items-center md:items-start gap-4">
+            <div className="text-3xl font-bold tracking-tighter">
+              <span className="text-cyan">R</span><span className="text-white">hygen</span>
+            </div>
+            <p className="text-white/40 text-sm font-light tracking-widest uppercase">
+              Intelligent Hybrid Powertrains
+            </p>
+          </div>
 
-        <div className="flex items-center gap-4">
-          <a href="#" className="text-[#A0A8C0] hover:text-[#5B4EE8] transition-colors">
-            <Linkedin className="w-5 h-5" />
-          </a>
-          <a href="mailto:hello@rhygen.com" className="text-[#A0A8C0] hover:text-[#5B4EE8] transition-colors">
-            <Mail className="w-5 h-5" />
-          </a>
-        </div>
+          <div className="flex gap-12 text-sm text-white/40 font-medium">
+            <a href="#" className="hover:text-violet transition-colors">Privacy</a>
+            <a href="#" className="hover:text-violet transition-colors">Terms</a>
+            <a href="#" className="hover:text-violet transition-colors">LinkedIn</a>
+            <a href="#" className="hover:text-violet transition-colors">Twitter</a>
+          </div>
 
+          <div className="text-white/20 text-xs font-mono text-center md:text-right">
+            © 2026 RHYGEN TECHNOLOGIES PVT LTD. <br/>
+            All rights reserved.
+          </div>
+        </div>
       </div>
     </footer>
   );

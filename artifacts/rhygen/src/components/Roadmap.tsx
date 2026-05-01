@@ -1,189 +1,176 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { CheckCircle } from "lucide-react";
+
+const milestones = [
+  {
+    number: "01",
+    title: "Prototype 1.0 Complete",
+    text: "Tata Ace built, road tested, dyno tested, baseline data captured",
+    status: "ACHIEVED",
+    color: "#00E5FF"
+  },
+  {
+    number: "02",
+    title: "Architecture 2.0 & IP Progress",
+    text: "Dual power-split refinement, control system development, IP advancement, Pune shift",
+    status: "IN PROGRESS",
+    color: "#5B4EE8"
+  },
+  {
+    number: "03",
+    title: "Automotive-Grade Prototype 2.0",
+    text: "Improved HCU, packaging, integration, validation preparation",
+    status: "Q3 2026",
+    color: "#7C6CFF"
+  },
+  {
+    number: "04",
+    title: "Fleet Pilot Deployments",
+    text: "Pilot vehicles with logistics operators in real operating conditions",
+    status: "Q4 2026",
+    color: "#00E5FF"
+  },
+  {
+    number: "05",
+    title: "OEM Engagement",
+    text: "Presentations and technical discussions with commercial vehicle manufacturers",
+    status: "2027 STRATEGY",
+    color: "#5B4EE8"
+  },
+  {
+    number: "06",
+    title: "Certification & Validation",
+    text: "Homologation and testing readiness",
+    status: "Q1 2027",
+    color: "#7C6CFF"
+  },
+  {
+    number: "07",
+    title: "Manufacturing Scale-Up",
+    text: "Seed round facility setup, supply chain, deployment scaling",
+    status: "VISION 2027",
+    color: "#00E5FF"
+  }
+];
+
+function MilestoneCard({ milestone, index }: { milestone: typeof milestones[0], index: number }) {
+  const isEven = index % 2 === 0;
+  
+  return (
+    <div className={`relative w-full flex items-center justify-center mb-40 last:mb-0`}>
+      {/* Central Connector Node */}
+      <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-black border-2 border-white/20 z-10 flex items-center justify-center">
+        <motion.div 
+          initial={{ scale: 0 }}
+          whileInView={{ scale: 1 }}
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: milestone.color, boxShadow: `0 0 15px ${milestone.color}` }}
+        />
+      </div>
+
+      <div className={`flex w-full max-w-[1200px] items-center ${isEven ? "flex-row" : "flex-row-reverse"}`}>
+        {/* Content Card */}
+        <div className="w-[45%]">
+          <motion.div 
+            initial={{ opacity: 0, x: isEven ? -50 : 50, scale: 0.95 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            className="glass-ui p-10 group hover:border-white/20 transition-all duration-500 relative overflow-hidden"
+          >
+            {/* Number Watermark */}
+            <span className="absolute -top-6 -right-6 text-9xl font-black text-white/[0.03] select-none group-hover:text-white/[0.06] transition-colors pointer-events-none">
+              {milestone.number}
+            </span>
+
+            {/* Status Tag */}
+            <div 
+              className="absolute top-0 left-0 px-4 py-1.5 rounded-br-xl text-[9px] font-black tracking-widest text-black"
+              style={{ backgroundColor: milestone.color }}
+            >
+              {milestone.status}
+            </div>
+
+            {/* Background Glow */}
+            <div 
+              className="absolute -right-20 -top-20 w-40 h-40 rounded-full blur-[80px] opacity-10 transition-opacity group-hover:opacity-20"
+              style={{ backgroundColor: milestone.color }}
+            />
+            
+            <h4 className="text-2xl font-bold text-white mb-4 group-hover:text-cyan transition-colors">{milestone.title}</h4>
+            <div className="w-12 h-[2px] bg-white/20 mb-6 group-hover:w-full transition-all duration-700" style={{ backgroundColor: `${milestone.color}44` }} />
+            <p className="text-[#A0A8C0] font-light leading-relaxed text-base">
+              {milestone.text}
+            </p>
+
+            {/* Corner Bracket */}
+            <div className="absolute bottom-8 right-8 w-8 h-8 border-b border-r border-white/5 group-hover:border-white/20 transition-colors" />
+          </motion.div>
+        </div>
+
+        {/* Empty space for the other side */}
+        <div className="w-[10%]" />
+        <div className="w-[45%]" />
+      </div>
+    </div>
+  );
+}
 
 export function Roadmap() {
   const containerRef = useRef<HTMLDivElement>(null);
-  
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start center", "end center"]
+    offset: ["start end", "end start"]
   });
 
-  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
-  const milestones = [
-    {
-      side: "left",
-      date: "Dec 2025–Feb 2026",
-      status: "COMPLETED ✓",
-      color: "text-green-400 bg-green-500/10 border-green-500/20",
-      title: "Tata Ace Prototype 1.0",
-      details: ["Bench scale validation", "Basic control architecture", "Initial road testing"],
-      chip: "Powered by Grants",
-      chipColor: "text-[#5B4EE8] bg-[#5B4EE8]/10"
-    },
-    {
-      side: "right",
-      date: "Mar 2026–May 2026",
-      status: "IN PROGRESS",
-      color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-      title: "Architecture 2.0 + IP Filing",
-      details: ["Refined planetary gear split", "Advanced ML models trained", "Comprehensive patent filings"],
-      chip: null
-    },
-    {
-      side: "left",
-      date: "Jun–Sep 2026",
-      status: "UPCOMING",
-      color: "text-[#A0A8C0] bg-white/5 border-white/10",
-      title: "Prototype 2.0 + ARAI Certification",
-      details: ["Full-scale MHCV integration", "Thermal stress testing", "Official ARAI efficiency cert"],
-      chip: null
-    },
-    {
-      side: "right",
-      date: "Oct–Nov 2026",
-      status: "UPCOMING",
-      color: "text-[#A0A8C0] bg-white/5 border-white/10",
-      title: "OEM Presentations + Fleet Pilot Deployment",
-      details: ["Deploying 5 retrofitted trucks", "Live telemetry dashboards", "OEM evaluation phase"],
-      chip: "Seed Round — Nov 2026",
-      chipColor: "text-[#00E5FF] bg-[#00E5FF]/10"
-    }
-  ];
-
-  const grants = [
-    { name: "gradCapital Atomic Grant", amount: "₹3.6L" },
-    { name: "SINE IoE Grant", amount: "₹6L" },
-    { name: "Emergent Ventures Grant", amount: "₹15.3L" },
-    { name: "AWS Campus Fund Grand Challenge 2025", amount: "₹1.8L" },
-    { name: "First Prize, SIAT (ARAI) 2026", amount: "—" }
-  ];
+  const pathProgress = useSpring(scrollYProgress, { stiffness: 40, damping: 20 });
+  const pathLength = useTransform(pathProgress, [0.1, 0.9], [0, 1]);
 
   return (
-    <section id="roadmap" className="py-24 bg-[#0A0A18] relative">
-      <div className="container mx-auto px-6 max-w-[1440px]">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20 text-center"
-        >
-          <span className="text-[12px] font-bold tracking-[3px] text-[#A0A8C0] mb-4 block">ROADMAP</span>
-          <h2 className="text-[40px] md:text-[52px] font-bold text-white max-w-[800px] mx-auto leading-[1.1]">
-            The path from prototype to Tier-1 supplier.
+    <section id="roadmap" ref={containerRef} className="relative py-40 bg-transparent">
+      <div className="max-w-[1440px] mx-auto px-6">
+        
+        {/* Header */}
+        <div className="text-center mb-40">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="label-caps text-cyan mb-4"
+          >
+            The Strategic Journey
+          </motion.div>
+          <h2 className="text-[clamp(40px,6vw,80px)] font-bold text-white uppercase tracking-tighter">
+            THE <span className="text-violet">ROADMAP.</span>
           </h2>
-        </motion.div>
+        </div>
 
-        <div className="flex flex-col lg:flex-row gap-16 relative" ref={containerRef}>
+        {/* Timeline Container */}
+        <div className="relative">
           
-          {/* Left Sidebar: Grants */}
-          <div className="lg:w-[320px] shrink-0">
-            <div className="sticky top-32 bg-[#0F1020] border border-white/5 rounded-2xl p-6">
-              <h3 className="text-[16px] font-bold text-white mb-6">Grants & Support</h3>
-              <div className="flex flex-col gap-4">
-                {grants.map((grant, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="text-[14px] font-semibold text-white/90 leading-snug mb-1">{grant.name}</div>
-                      <div className="text-[13px] text-[#5B4EE8] font-bold">{grant.amount}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Area: Zig-Zag Timeline */}
-          <div className="flex-1 relative min-h-[800px] py-10">
-            
-            {/* SVG Road Path (Desktop only) */}
-            <div className="hidden md:block absolute inset-0 z-0 pointer-events-none">
-              <svg width="100%" height="100%" viewBox="0 0 100 1000" preserveAspectRatio="none" className="overflow-visible">
-                {/* Base faded line */}
-                <path 
-                  d="M 50 0 L 50 150 L 30 250 L 30 400 L 70 500 L 70 650 L 50 750 L 50 1000" 
-                  fill="none" 
-                  stroke="rgba(255,255,255,0.05)" 
-                  strokeWidth="1" 
-                  strokeLinejoin="round"
-                  vectorEffect="non-scaling-stroke"
-                />
-                {/* Animated glowing line */}
-                <motion.path 
-                  d="M 50 0 L 50 150 L 30 250 L 30 400 L 70 500 L 70 650 L 50 750 L 50 1000" 
-                  fill="none" 
-                  stroke="url(#gradient)" 
-                  strokeWidth="2" 
-                  strokeLinejoin="round"
-                  vectorEffect="non-scaling-stroke"
-                  style={{ pathLength }}
-                />
-                <defs>
-                  <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#5B4EE8" />
-                    <stop offset="100%" stopColor="#00E5FF" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-
-            {/* Mobile straight line */}
-            <div className="md:hidden absolute top-0 bottom-0 left-6 w-1 bg-white/5 rounded-full z-0" />
+          {/* Central Path Line */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-white/5 overflow-hidden">
             <motion.div 
-              className="md:hidden absolute top-0 bottom-0 left-6 w-1 bg-gradient-to-b from-[#5B4EE8] to-[#00E5FF] rounded-full z-0 origin-top"
-              style={{ scaleY: pathLength }}
+              style={{ scaleY: pathLength, originY: 0 }}
+              className="w-full h-full bg-gradient-to-b from-cyan via-violet to-cyan shadow-[0_0_15px_rgba(0,229,255,0.5)]"
             />
-
-            {/* Milestones */}
-            <div className="relative z-10 flex flex-col gap-12 md:gap-32">
-              {milestones.map((m, i) => (
-                <div 
-                  key={i} 
-                  className={`flex w-full relative ${
-                    m.side === "left" 
-                      ? "md:justify-start md:pr-[55%] md:-mt-[5%]" 
-                      : "md:justify-end md:pl-[55%] md:mt-[5%]"
-                  } pl-16 md:pl-0`}
-                >
-                  <motion.div
-                    initial={{ opacity: 0, x: m.side === "left" ? -30 : 30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    className="bg-[#0F1020] border border-white/10 rounded-2xl p-6 w-full md:w-[420px] hover:border-[#5B4EE8]/40 transition-colors relative"
-                  >
-                    {/* Mobile Dot */}
-                    <div className="md:hidden absolute top-8 -left-[46px] w-4 h-4 rounded-full bg-[#5B4EE8] border-4 border-[#0A0A18]" />
-
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-[13px] font-semibold text-[#A0A8C0]">{m.date}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${m.color}`}>
-                        {m.status}
-                      </span>
-                    </div>
-                    <h4 className="text-[20px] font-bold text-white mb-4">{m.title}</h4>
-                    <ul className="flex flex-col gap-2 mb-6">
-                      {m.details.map((detail, j) => (
-                        <li key={j} className="text-[14px] text-[#A0A8C0] flex items-start gap-2">
-                          <span className="text-[#5B4EE8] mt-1">•</span> {detail}
-                        </li>
-                      ))}
-                    </ul>
-                    {m.chip && (
-                      <div className="inline-block">
-                        <span className={`px-3 py-1 rounded-full text-[12px] font-bold ${m.chipColor}`}>
-                          {m.chip}
-                        </span>
-                      </div>
-                    )}
-                  </motion.div>
-                </div>
-              ))}
-            </div>
-
           </div>
+
+          {/* Milestones */}
+          <div className="relative z-10">
+            {milestones.map((milestone, i) => (
+              <MilestoneCard key={i} milestone={milestone} index={i} />
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom Call to Action */}
+        <div className="mt-40 text-center">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="inline-block glass-ui px-12 py-6 border-violet/30"
+          >
+            <span className="text-white/40 text-xs tracking-[4px] uppercase font-bold">Engineering the Future of Logistics</span>
+          </motion.div>
         </div>
 
       </div>

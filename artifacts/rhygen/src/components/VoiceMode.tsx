@@ -1,42 +1,72 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
-import { Canvas } from "@react-three/fiber";
-import { ParticleField } from "./ParticleField";
-import { SafeCanvas } from "./SafeCanvas";
+import { X, Mic } from "lucide-react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Sphere, MeshDistortMaterial, Float, Environment } from "@react-three/drei";
+import * as THREE from "three";
+
+function RotatingOrb({ isSpeaking }: { isSpeaking: boolean }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.01;
+      meshRef.current.rotation.z += 0.005;
+    }
+  });
+
+  return (
+    <Float speed={5} rotationIntensity={2} floatIntensity={2}>
+      <Sphere args={[1.2, 64, 64]} ref={meshRef}>
+        <MeshDistortMaterial
+          color={isSpeaking ? "#00E5FF" : "#5B4EE8"}
+          speed={isSpeaking ? 5 : 2}
+          distort={isSpeaking ? 0.4 : 0.2}
+          radius={1}
+          emissive={isSpeaking ? "#00E5FF" : "#5B4EE8"}
+          emissiveIntensity={isSpeaking ? 2 : 1}
+          metalness={0.9}
+          roughness={0.1}
+        />
+      </Sphere>
+      
+      {/* Outer Pulse Rings */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.8, 0.01, 16, 100]} />
+        <meshBasicMaterial color="#00E5FF" transparent opacity={0.3} />
+      </mesh>
+      <mesh rotation={[0, Math.PI / 2, 0]}>
+        <torusGeometry args={[2.2, 0.005, 16, 100]} />
+        <meshBasicMaterial color="#5B4EE8" transparent opacity={0.2} />
+      </mesh>
+    </Float>
+  );
+}
+
+const SCRIPT = "This is Rhygen. We aren't building a concept; we are building the bridge. India's freight economy runs on diesel—sacrificing our air quality and crippling fleet margins. Pure electric is a decades-away illusion for heavy freight. So we built an intelligent hybrid powertrain. Electric drive. AI-managed combustion. No massive batteries. No charging infrastructure. Just thirty percent fewer emissions and triple the profit margins, starting today. Welcome to the new standard.";
 
 interface VoiceModeProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const SCRIPT = "Welcome to Rhygen. We're building the future of sustainable transportation. India's trucks carry the nation's economy — but they account for fifty percent of vehicular emissions while being just four percent of vehicles on the road. Diesel costs eat forty-five to fifty percent of every fleet operator's budget, leaving profit margins of just three to five percent. Electric trucks don't work for this — the batteries are too expensive and heavy, charging takes too long, and India's power grid cannot support the load. Hydrogen is decades away from being practical. We built a smarter solution. An AI-powered hybrid powertrain that combines electric drive with a small, efficient combustion engine — cutting emissions by twenty to thirty percent, improving mileage by up to three times, and increasing fleet profits by three hundred to four hundred percent. No charging infrastructure needed. Works on existing roads, with existing fuel, from day one. We are Rhygen — reliable, efficient, revolutionary, and necessary.";
-
 export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
-  const [displayedText, setDisplayedText] = useState("Listening...");
+  const [displayedText, setDisplayedText] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
-
+  
   useEffect(() => {
     if (isOpen) {
+      setIsSpeaking(true);
+      setDisplayedText("");
+      
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
-        setIsSpeaking(true);
-        setDisplayedText("");
-        
         const utterance = new SpeechSynthesisUtterance(SCRIPT);
-        synthRef.current = utterance;
-        
-        utterance.rate = 0.95;
-        
-        // Very basic word sync approximation
-        const words = SCRIPT.split(" ");
-        let wordIndex = 0;
+        utterance.rate = 0.9;
         
         utterance.onboundary = (event) => {
           if (event.name === 'word') {
-            const currentText = SCRIPT.substring(0, event.charIndex + event.charLength);
-            setDisplayedText(currentText);
+            setDisplayedText(SCRIPT.substring(0, event.charIndex + event.charLength));
           }
         };
 
@@ -45,51 +75,13 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
           setDisplayedText(SCRIPT);
         };
 
-        // Fallback if onboundary doesn't fire well
-        const durationApprox = words.length * 400; // ~400ms per word
-        let manualSync: NodeJS.Timeout;
-        if (!('onboundary' in utterance)) {
-           manualSync = setInterval(() => {
-             if (wordIndex < words.length) {
-               setDisplayedText(words.slice(0, wordIndex + 1).join(" "));
-               wordIndex++;
-             } else {
-               clearInterval(manualSync);
-             }
-           }, durationApprox / words.length);
-        }
-
         window.speechSynthesis.speak(utterance);
-        
-        return () => {
-          window.speechSynthesis.cancel();
-          if (manualSync) clearInterval(manualSync);
-        };
-      } else {
-        // Fallback for no speech synthesis
-        setIsSpeaking(true);
-        let i = 0;
-        const words = SCRIPT.split(" ");
-        const int = setInterval(() => {
-          setDisplayedText(words.slice(0, i + 1).join(" "));
-          i++;
-          if (i >= words.length) {
-            clearInterval(int);
-            setIsSpeaking(false);
-          }
-        }, 300);
-        return () => clearInterval(int);
       }
     }
-    return undefined;
+    return () => {
+      if (typeof window !== "undefined") window.speechSynthesis.cancel();
+    };
   }, [isOpen]);
-
-  const closeAndStop = () => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-    }
-    onClose();
-  };
 
   return (
     <AnimatePresence>
@@ -98,77 +90,49 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(7,7,16,0.97)]"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070710]/98 backdrop-blur-3xl"
         >
-          {/* Close Button */}
-          <button 
-            onClick={closeAndStop}
-            className="absolute top-8 right-8 text-white hover:text-[#5B4EE8] transition-colors z-20"
-          >
-            <X size={32} />
+          <button onClick={onClose} className="absolute top-12 right-12 text-white/50 hover:text-white transition-colors">
+            <X size={40} />
           </button>
 
-          {/* Background Particles */}
-          <div className="absolute inset-0 z-0">
-            <SafeCanvas>
-              <Canvas camera={{ position: [0, 0, 5] }} gl={{ failIfMajorPerformanceCaveat: false }}>
-                <ParticleField count={200} speed={0.2} radius={8} color="#ffffff" />
-              </Canvas>
-            </SafeCanvas>
+          <div className="w-full h-[50vh] relative mb-12">
+            <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+              <ambientLight intensity={0.5} />
+              <pointLight position={[10, 10, 10]} intensity={2} />
+              <RotatingOrb isSpeaking={isSpeaking} />
+              <Environment preset="night" />
+            </Canvas>
+            
+            {/* Waveform Bars Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center gap-2 pointer-events-none">
+              {[...Array(20)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ 
+                    height: isSpeaking ? [10, Math.random() * 60 + 20, 10] : 4,
+                    opacity: isSpeaking ? [0.4, 1, 0.4] : 0.2
+                  }}
+                  transition={{ duration: 0.2, repeat: Infinity, delay: i * 0.05 }}
+                  className="w-1 bg-cyan rounded-full"
+                />
+              ))}
+            </div>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center">
-            {/* Visualizer Rings */}
-            <div className="relative flex items-center justify-center mb-12">
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute w-[340px] h-[340px] rounded-full border border-[rgba(0,229,255,0.3)] border-dashed"
-              />
-              <motion.div 
-                animate={{ rotate: -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute w-[280px] h-[280px] rounded-full border border-[rgba(0,229,255,0.3)]"
-              />
-              
-              {/* Core Circle */}
-              <div className="relative w-[220px] h-[220px] rounded-full border-2 border-[rgba(91,78,232,0.6)] bg-[radial-gradient(circle_at_center,rgba(91,78,232,0.15),transparent)] flex items-center justify-center gap-2">
-                {/* Waveform Bars */}
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <motion.div
-                    key={i}
-                    animate={{
-                      height: isSpeaking ? [20, 80 + Math.random() * 40, 20] : 20
-                    }}
-                    transition={{
-                      duration: isSpeaking ? 0.4 + Math.random() * 0.3 : 1.5,
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                      delay: i * 0.1
-                    }}
-                    className="w-3 rounded-full bg-gradient-to-t from-[#5B4EE8] to-[#00E5FF]"
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Subtitles */}
-            <div className="max-w-[700px] px-6 text-center h-[120px]">
-              {displayedText === "Listening..." ? (
-                <motion.p 
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="text-[18px] text-[#A0A8C0]"
-                >
-                  Listening...
-                </motion.p>
-              ) : (
-                <p className="text-[20px] md:text-[24px] text-white leading-relaxed font-medium">
-                  {displayedText}
-                </p>
-              )}
+          <div className="max-w-4xl px-12 text-center">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-[clamp(24px,4vw,40px)] text-white font-medium leading-relaxed tracking-tight"
+            >
+              {displayedText || <span className="opacity-30">Initializing system...</span>}
+            </motion.div>
+            
+            <div className="mt-12 flex items-center justify-center gap-4 text-cyan/50 uppercase tracking-[6px] text-xs font-bold">
+              <span className="w-12 h-[1px] bg-cyan/20" />
+              Rhygen Intelligence Core
+              <span className="w-12 h-[1px] bg-cyan/20" />
             </div>
           </div>
         </motion.div>

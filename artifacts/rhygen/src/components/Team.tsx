@@ -1,110 +1,105 @@
 import { motion } from "framer-motion";
-import { Linkedin } from "lucide-react";
 
 export function Team() {
-  const founders = [
-    {
-      initials: "AA",
+  const members = [
+    { 
       name: "Aditya Anand",
-      role: "Co-Founder · Electrical Systems & Business",
-      degree: "DD EE, IIT Bombay '26",
-      bio: "Spearheading power electronics and business strategy. Built complex electrical drivetrains for student racing teams.",
-      link: "#"
+      role: "Co-Founder · Electrical Systems & Business", 
+      background: "B.Tech EE, IIT Bombay '26", 
+      tag: "HV ARCHITECTURE",
+      image: "/aditya.png"
     },
-    {
-      initials: "SD",
+    { 
       name: "Sajal Deolikar",
-      role: "Co-Founder · Embedded Systems & Algorithms",
-      degree: "B.Tech EE, IIT Bombay '25",
-      bio: "Architecting the AI Hybrid Control Unit. Deep expertise in ML, edge computing, and real-time predictive control.",
-      link: "#"
+      role: "Co-Founder · Embedded Systems & Algorithms", 
+      background: "B.Tech EE, IIT Bombay '25", 
+      tag: "CONTROL LOGIC",
+      image: "/sajal.png"
     },
-    {
-      initials: "SK",
+    { 
       name: "Sannidhya Kaushal",
-      role: "Co-Founder · Mechanical Design & Vehicle Integration",
-      degree: "B.Tech EE, IIT Bombay '25",
-      bio: "Leading planetary gear design and mechanical integration. Expert in thermal modeling and CAD kinematics.",
-      link: "#"
+      role: "Co-Founder · Mechanical Design & Vehicle Integration", 
+      background: "B.Tech EE, IIT Bombay '25", 
+      tag: "DYNAMICS & CAD",
+      image: "/sannidhya.jpg"
     },
-    {
-      initials: "AG",
-      name: "Adi Gupta",
-      role: "Team Member · Electrical Engineering",
-      degree: "DD EE, IIT Bombay '28",
-      bio: "Focusing on battery management systems and high-voltage safety architecture for heavy payload applications.",
-      link: "#"
-    }
   ];
 
   return (
-    <section id="team" className="py-24 bg-[#070710]">
-      <div className="container mx-auto px-6 max-w-[1440px]">
-        <motion.div
+    <section id="team" className="min-h-screen flex flex-col items-center justify-center py-40 bg-transparent">
+      <div className="max-w-[1440px] w-full px-6 flex flex-col items-center">
+        
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16 text-center"
+          className="label-caps text-violet mb-8"
         >
-          <span className="text-[12px] font-bold tracking-[3px] text-[#A0A8C0] mb-4 block">FOUNDING TEAM</span>
-          <h2 className="text-[40px] md:text-[48px] font-bold text-white mb-6">
-            Four IIT Bombay engineers. One obsession.
-          </h2>
-          <p className="text-[18px] text-[#A0A8C0] max-w-[680px] mx-auto">
-            We spent our college years building racing cars and rovers. Now we're applying that intensity to the heaviest emitters on the road.
-          </p>
+          The strike team
         </motion.div>
+        
+        <h2 className="text-[clamp(40px,6vw,100px)] font-black text-center text-white mb-32 tracking-tighter uppercase leading-[0.9]">
+          TECHNICAL <br/>
+          <span className="text-violet">FORMIDABLE.</span>
+        </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {founders.map((f, i) => (
-            <motion.div
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-full max-w-[1200px]">
+          {members.map((member, i) => (
+            <motion.div 
               key={i}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-[#0F1020] border border-[rgba(91,78,232,0.2)] rounded-2xl p-8 hover:-translate-y-1.5 hover:border-[rgba(91,78,232,0.7)] transition-all duration-300 flex flex-col h-full"
+              transition={{ delay: i * 0.15, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="relative group cursor-pointer"
             >
-              <div className="w-[100px] h-[100px] rounded-full bg-gradient-to-tr from-[#5B4EE8] to-[#00E5FF] mb-6 flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(91,78,232,0.3)]">
-                <span className="text-[32px] font-bold text-white tracking-wider">{f.initials}</span>
+              {/* Card Container */}
+              <div className="glass-ui p-1 w-full aspect-[4/5] rounded-[32px] overflow-hidden group-hover:border-violet/50 transition-all duration-700 bg-white/[0.02] relative">
+                
+                {/* Member Image with Mask/Effect */}
+                <div className="absolute inset-0 z-0">
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-1000 ease-out scale-110 group-hover:scale-100"
+                  />
+                  {/* Cinematic Overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A0B14] via-[#0A0B14]/40 to-transparent opacity-90" />
+                  <div className="absolute inset-0 bg-violet/5 group-hover:bg-transparent transition-colors duration-700" />
+                </div>
+
+                <div className="w-full h-full relative z-10 flex flex-col justify-end p-10">
+                  
+                  {/* Technical HUD Overlay */}
+                  <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 group-hover:opacity-60 transition-all duration-700">
+                    <div className="absolute top-8 right-8 w-12 h-12 border-t border-r border-cyan/40" />
+                    <div className="absolute bottom-8 left-8 w-12 h-12 border-b border-l border-cyan/40" />
+                    
+                    {/* Scanning Line Animation on Hover */}
+                    <motion.div 
+                      initial={{ top: '0%' }}
+                      whileHover={{ top: '100%' }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="absolute left-0 w-full h-[1px] bg-cyan/20 hidden group-hover:block"
+                    />
+                  </div>
+
+                  {/* Member Info */}
+                  <div className="relative z-10">
+                    <div className="label-caps text-cyan text-[9px] mb-4 opacity-100 tracking-[3px] font-black">{member.tag}</div>
+                    <h3 className="text-3xl font-black text-white mb-3 group-hover:text-cyan transition-colors">{member.name}</h3>
+                    <div className="w-8 h-[2px] bg-cyan mb-6 group-hover:w-24 transition-all duration-700" />
+                    <p className="text-white font-bold text-sm mb-2 drop-shadow-md">{member.role}</p>
+                    <p className="text-white/60 text-xs font-light font-mono">{member.background}</p>
+                  </div>
+                </div>
               </div>
-              
-              <h3 className="text-[20px] font-[600] text-white text-center mb-1">{f.name}</h3>
-              <p className="text-[14px] font-medium gradient-text text-center mb-2">{f.role}</p>
-              <p className="text-[13px] text-[#A0A8C0] text-center mb-6">{f.degree}</p>
-              
-              <p className="text-[13px] text-[#A0A8C0] leading-relaxed text-center flex-1 mb-6">
-                {f.bio}
-              </p>
-              
-              <div className="mt-auto flex justify-center">
-                <a href={f.link} className="text-[#A0A8C0] hover:text-[#5B4EE8] transition-colors">
-                  <Linkedin className="w-5 h-5" />
-                </a>
+
+              {/* Founder / IITB Badge */}
+              <div className="absolute -top-3 -right-3 px-4 py-2 bg-cyan text-black text-[10px] font-black tracking-widest rounded-lg shadow-[0_0_20px_rgba(0,229,255,0.4)] z-20 transition-all duration-500 group-hover:bg-white group-hover:scale-110">
+                IIT BOMBAY
               </div>
             </motion.div>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="flex flex-col md:flex-row items-center justify-center gap-6 py-6 border-t border-white/5"
-        >
-          <span className="text-[14px] text-[#A0A8C0] font-medium">
-            Pre-incubated at SINE, IIT Bombay · Know-How IP filed with IRCC, IIT Bombay
-          </span>
-          <div className="flex gap-4">
-            <div className="h-10 px-4 bg-white/5 rounded flex items-center justify-center border border-white/10 text-white/50 text-xs font-bold">
-              SINE Logo
-            </div>
-            <div className="h-10 px-4 bg-white/5 rounded flex items-center justify-center border border-white/10 text-white/50 text-xs font-bold">
-              IITB Logo
-            </div>
-          </div>
-        </motion.div>
-
       </div>
     </section>
   );
