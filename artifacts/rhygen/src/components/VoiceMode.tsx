@@ -62,7 +62,25 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(SCRIPT);
-        utterance.rate = 0.9;
+        
+        // Select a smoother voice
+        const setBestVoice = () => {
+          const voices = window.speechSynthesis.getVoices();
+          const smoothVoice = voices.find(v => 
+            v.name.includes("Google") || 
+            v.name.includes("Samantha") || 
+            v.name.includes("Premium") ||
+            v.name.includes("Natural")
+          );
+          if (smoothVoice) utterance.voice = smoothVoice;
+        };
+        setBestVoice();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+          window.speechSynthesis.onvoiceschanged = setBestVoice;
+        }
+
+        utterance.rate = 0.95;
+        utterance.pitch = 1.1; // Slightly smoother pitch
         
         utterance.onboundary = (event) => {
           if (event.name === 'word') {
@@ -92,7 +110,7 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070710]/98 backdrop-blur-3xl"
         >
-          <button onClick={onClose} className="absolute top-12 right-12 text-white/50 hover:text-white transition-colors">
+          <button onClick={onClose} className="absolute top-12 right-12 text-white/50 hover:text-white transition-colors z-[200] cursor-pointer pointer-events-auto">
             <X size={40} />
           </button>
 

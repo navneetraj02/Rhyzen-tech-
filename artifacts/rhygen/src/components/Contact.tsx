@@ -35,28 +35,30 @@ export function Contact() {
               </div>
             </div>
 
-            <form className="flex flex-col gap-8">
+            <form action="https://api.web3forms.com/submit" method="POST" className="flex flex-col gap-8">
+              {/* Replace 'YOUR_ACCESS_KEY_HERE' with your actual key from web3forms.com */}
+              <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE" />
               <div className="flex flex-col gap-2">
                 <label className="label-caps text-[10px] text-white/40 ml-4">Inquiry Type</label>
-                <select className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-violet transition-colors appearance-none">
-                  <option className="bg-[#070710]">Fleet Partnership</option>
-                  <option className="bg-[#070710]">OEM Integration</option>
-                  <option className="bg-[#070710]">Investment</option>
-                  <option className="bg-[#070710]">Media Inquiry</option>
+                <select name="inquiry_type" required className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-violet transition-colors appearance-none">
+                  <option className="bg-[#070710]" value="Fleet Partnership">Fleet Partnership</option>
+                  <option className="bg-[#070710]" value="OEM Integration">OEM Integration</option>
+                  <option className="bg-[#070710]" value="Investment">Investment</option>
+                  <option className="bg-[#070710]" value="Media Inquiry">Media Inquiry</option>
                 </select>
               </div>
 
               <div className="flex flex-col gap-2">
                 <label className="label-caps text-[10px] text-white/40 ml-4">Full Name</label>
-                <input type="text" className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-violet transition-colors" placeholder="John Doe" />
+                <input type="text" name="name" required className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-violet transition-colors" placeholder="John Doe" />
               </div>
 
               <div className="flex flex-col gap-2">
                 <label className="label-caps text-[10px] text-white/40 ml-4">Work Email</label>
-                <input type="email" className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-violet transition-colors" placeholder="john@company.com" />
+                <input type="email" name="email" required className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-violet transition-colors" placeholder="john@company.com" />
               </div>
 
-              <button className="w-full bg-white text-black font-bold uppercase tracking-[4px] py-6 rounded-2xl hover:bg-violet hover:text-white transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+              <button type="submit" className="w-full bg-white text-black font-bold uppercase tracking-[4px] py-6 rounded-2xl hover:bg-violet hover:text-white transition-all transform hover:scale-[1.02] active:scale-[0.98]">
                 Submit Inquiry
               </button>
             </form>
