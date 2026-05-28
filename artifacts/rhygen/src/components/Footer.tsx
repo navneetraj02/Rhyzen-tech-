@@ -37,8 +37,17 @@ export function Footer() {
       <div className="container mx-auto px-6 max-w-[1440px] relative z-10">
         <div className="flex flex-col md:flex-row items-center justify-between gap-12 pt-20">
           <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="text-3xl font-bold tracking-tighter">
-              <span className="text-cyan">R</span><span className="text-white">hygen</span>
+            <div className="flex items-center gap-2 text-3xl font-bold tracking-tighter">
+              <div className="w-8 h-6 overflow-hidden flex items-start justify-center">
+                <img 
+                  src="/logo.jpg" 
+                  alt="Rhygen Logo" 
+                  className="w-full h-auto mix-blend-screen scale-110 object-top"
+                />
+              </div>
+              <div>
+                <span className="text-cyan">R</span><span className="text-white">hygen</span>
+              </div>
             </div>
             <p className="text-white/40 text-sm font-light tracking-widest uppercase">
               Intelligent Hybrid Powertrains

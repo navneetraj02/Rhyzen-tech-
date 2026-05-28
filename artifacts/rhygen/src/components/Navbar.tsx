@@ -36,9 +36,16 @@ export function Navbar({ onVoiceClick }: NavbarProps) {
         
         {/* Logo */}
         <div 
-          className="flex items-center cursor-pointer group" 
+          className="flex items-center gap-3 cursor-pointer group" 
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
+          <div className="w-10 h-8 overflow-hidden flex items-start justify-center">
+            <img 
+              src="/logo.jpg" 
+              alt="Rhygen Logo" 
+              className="w-full h-auto mix-blend-screen scale-110 object-top"
+            />
+          </div>
           <div className="text-[clamp(32px,4vw,38px)] font-black tracking-tighter relative">
             <span className="text-cyan transition-all duration-500 group-hover:text-violet drop-shadow-[0_0_12px_rgba(0,229,255,0.6)] group-hover:drop-shadow-[0_0_15px_rgba(124,108,255,0.6)]">R</span>
             <span className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">HYGEN</span>
