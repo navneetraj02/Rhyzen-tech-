@@ -11,8 +11,8 @@ const milestones = [
   },
   {
     number: "02",
-    title: "Architecture 2.0 & IP Progress",
-    text: "Dual power-split refinement, control system development, IP advancement, Pune shift",
+    title: "Architecture 2.0 Progress",
+    text: "Dual power-split refinement, control system development, Pune shift",
     status: "IN PROGRESS",
     color: "#5B4EE8"
   },

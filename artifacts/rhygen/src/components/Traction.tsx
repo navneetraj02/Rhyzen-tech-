@@ -5,7 +5,6 @@ export function Traction() {
   const achievements = [
     { icon: <CheckCircle className="text-emerald-400" />, title: "Working Prototype", desc: "Full-scale powertrain validation complete." },
     { icon: <Shield className="text-violet" />, title: "IIT Bombay / SINE", desc: "Incubated at India's premier deep-tech ecosystem." },
-    { icon: <Award className="text-cyan" />, title: "IP Filed", desc: "Proprietary hybrid control logic and system architecture protected." },
     { icon: <Landmark className="text-amber-400" />, title: "Grant Winner", desc: "Recognized by national innovation bodies for technical depth." },
   ];
 
@@ -24,7 +23,7 @@ export function Traction() {
           Evidence emerging from <span className="text-violet">darkness.</span>
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-full max-w-5xl">
           {achievements.map((item, i) => (
             <motion.div 
               key={i}
@@ -52,7 +51,7 @@ export function Traction() {
             className="flex gap-20 whitespace-nowrap text-white font-black text-2xl tracking-[10px] uppercase"
           >
             {[...Array(10)].map((_, i) => (
-              <span key={i}>IIT BOMBAY • SINE • TATA ACE PROTOTYPE • IP PROTECTED • SEED GRANT • AUTOMOTIVE GRADE •</span>
+              <span key={i}>IIT BOMBAY • SINE • TATA ACE PROTOTYPE • SEED GRANT • AUTOMOTIVE GRADE •</span>
             ))}
           </motion.div>
         </div>

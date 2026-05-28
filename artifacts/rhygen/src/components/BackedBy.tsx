@@ -5,7 +5,6 @@ export function BackedBy() {
     { name: "gradCapital", type: "ATOMIC GRANT", logo: "/logo_gradcapital.png" },
     { name: "SINE IIT Bombay", type: "IoE GRANT", logo: "/logo_sine.png" },
     { name: "Emergent Ventures", type: "GRANT", logo: "/logo_emergent.png" },
-    { name: "AWS Campus Fund", type: "GRAND CHALLENGE", logo: "/logo_aws.png" },
   ];
 
   return (
@@ -19,7 +18,7 @@ export function BackedBy() {
         </div>
 
         {/* High-Fidelity Static Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 border border-white/5 rounded-3xl overflow-hidden bg-white/[0.01] backdrop-blur-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="grid grid-cols-1 md:grid-cols-3 border border-white/5 rounded-3xl overflow-hidden bg-white/[0.01] backdrop-blur-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           {backers.map((backer, i) => (
             <motion.div 
               key={i}
