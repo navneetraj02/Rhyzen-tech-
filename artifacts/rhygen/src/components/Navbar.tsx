@@ -39,11 +39,11 @@ export function Navbar({ onVoiceClick }: NavbarProps) {
           className="flex items-center gap-3 cursor-pointer group" 
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
-          <div className="w-12 h-10 overflow-hidden flex items-center justify-center">
+          <div className="w-10 h-10 flex items-center justify-center">
             <img 
-              src="/logo.jpg" 
+              src="/logo_cropped.png" 
               alt="Rhygen Logo" 
-              className="w-full h-auto mix-blend-screen scale-[1.3] -translate-y-[8%]"
+              className="w-full h-full object-contain mix-blend-screen"
             />
           </div>
           <div className="text-[clamp(32px,4vw,38px)] font-black tracking-tighter relative">

@@ -38,11 +38,11 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-12 pt-20">
           <div className="flex flex-col items-center md:items-start gap-4">
             <div className="flex items-center gap-2 text-3xl font-bold tracking-tighter">
-              <div className="w-10 h-8 overflow-hidden flex items-center justify-center">
+              <div className="w-8 h-8 flex items-center justify-center">
                 <img 
-                  src="/logo.jpg" 
+                  src="/logo_cropped.png" 
                   alt="Rhygen Logo" 
-                  className="w-full h-auto mix-blend-screen scale-[1.3] -translate-y-[8%]"
+                  className="w-full h-full object-contain mix-blend-screen"
                 />
               </div>
               <div>
