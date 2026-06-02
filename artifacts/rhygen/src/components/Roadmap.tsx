@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 
 const milestones = [
@@ -212,6 +212,14 @@ export function Roadmap() {
   const endExtension = 150;
   const totalWidth = startX + milestones.length * gap + endExtension;
 
+  // Custom high-performance motion value for robust scroll tracking
+  const scrollProgress = useMotionValue(0);
+  const smoothProgress = useSpring(scrollProgress, { 
+    stiffness: 80, 
+    damping: 24, 
+    restDelta: 0.001 
+  });
+
   // Generate smooth horizontal Bezier zigzag curve
   const generatePath = () => {
     let d = `M ${startX},${centerY}`;
@@ -258,12 +266,36 @@ export function Roadmap() {
     };
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
+  // Custom DOM-based Scroll event observer using getBoundingClientRect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      
+      const rect = containerRef.current.getBoundingClientRect();
+      const scrolled = -rect.top;
+      const totalPinDistance = rect.height - window.innerHeight;
+      
+      let progress = 0;
+      if (totalPinDistance > 0) {
+        progress = Math.max(0, Math.min(1, scrolled / totalPinDistance));
+      }
+      
+      scrollProgress.set(progress);
+    };
 
-  const x = useTransform(scrollYProgress, [0, 1], [0, -scrollRange], { clamp: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    
+    // Calibrate position initially
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [scrollProgress]);
+
+  const x = useTransform(smoothProgress, [0, 1], [0, -scrollRange], { clamp: true });
 
   return (
     <section id="roadmap" ref={containerRef} className="relative h-[320vh] bg-transparent">
@@ -305,7 +337,7 @@ export function Roadmap() {
                 fill="none" 
                 stroke="url(#roadmap-grad)" 
                 strokeWidth={4} 
-                style={{ pathLength: scrollYProgress }} 
+                style={{ pathLength: smoothProgress }} 
                 strokeLinecap="round"
               />
               <defs>
@@ -317,7 +349,7 @@ export function Roadmap() {
               </defs>
             </svg>
 
-            {/* Logo Emblem at the start of the line (X = 100, Y = 340) */}
+            {/* Logo Emblem at the start of the line */}
             <div 
               style={{ left: `${startX}px`, top: `${centerY}px` }}
               className="absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-[#0c0d1b] border-2 border-white/20 rounded-full flex items-center justify-center z-30 shadow-[0_0_20px_rgba(0,229,255,0.2)]"
@@ -339,7 +371,7 @@ export function Roadmap() {
                   {/* Dynamic circular glowing node popping on scroll contact */}
                   <ScrollMilestoneNode 
                     index={i}
-                    scrollYProgress={scrollYProgress}
+                    scrollYProgress={smoothProgress}
                     totalCount={milestones.length}
                     xPosition={nodeX}
                     yPosition={nodeY}
@@ -350,7 +382,7 @@ export function Roadmap() {
                   <ScrollMilestoneCard 
                     milestone={milestone}
                     index={i}
-                    scrollYProgress={scrollYProgress}
+                    scrollYProgress={smoothProgress}
                     totalCount={milestones.length}
                     xPosition={nodeX}
                     yPosition={nodeY}
