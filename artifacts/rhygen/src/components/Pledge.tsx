@@ -74,7 +74,11 @@ export function Pledge() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
                   <div className="w-16 h-16 rounded-2xl border border-white/10 flex items-center justify-center bg-white/5 backdrop-blur-sm group-hover:border-cyan/30 transition-colors duration-500">
-                    <span className="text-cyan text-[10px] font-black tracking-widest rotate-[-90deg]">IITB</span>
+                    <img 
+                      src="/logo_square.png" 
+                      alt="Rhygen Logo" 
+                      className="w-10 h-10 object-contain mix-blend-screen"
+                    />
                   </div>
                   <motion.div 
                     initial={{ opacity: 0 }}
@@ -82,20 +86,9 @@ export function Pledge() {
                     transition={{ delay: 0.8 }}
                     className="flex flex-col"
                   >
-                    <span className="text-white font-bold text-xl tracking-wide">— The Rhygen Team</span>
+                    <span className="text-white font-bold text-xl tracking-wide">The Rhygen Team</span>
                     <span className="text-white/40 text-sm font-light">Excellence in Mobility</span>
                   </motion.div>
-                </div>
-
-                {/* Technical HUD element */}
-                <div className="hidden md:flex flex-col items-end opacity-20 text-[10px] font-mono tracking-tighter text-white">
-                  <span>SECURED PLEDGE</span>
-                  <span>VERIFIED: 2026</span>
-                  <div className="flex gap-1 mt-2">
-                    <div className="w-1 h-1 bg-cyan rounded-full animate-pulse" />
-                    <div className="w-1 h-1 bg-white rounded-full opacity-50" />
-                    <div className="w-1 h-1 bg-white rounded-full opacity-50" />
-                  </div>
                 </div>
               </div>
             </div>
