@@ -21,7 +21,7 @@ export function Impact() {
         <div className="flex flex-col gap-4 overflow-hidden">
           <motion.div style={{ x: xLeft }} className="flex gap-12 whitespace-nowrap">
             {[...Array(4)].map((_, i) => (
-              <span key={i} className="heading-massive text-white opacity-30">30% EMISSIONS REDUCTION</span>
+              <span key={i} className="heading-massive text-white opacity-30">~50% EMISSIONS REDUCTION</span>
             ))}
           </motion.div>
           <div className="flex justify-center px-6">
@@ -33,7 +33,7 @@ export function Impact() {
                   transition={{ duration: 1.5, ease: "easeOut" }}
                   className="text-[clamp(80px,10vw,140px)] font-black text-cyan leading-none"
                 >
-                  3X
+                  ~3X
                 </motion.div>
                 <div className="flex flex-col items-center md:items-start text-center md:text-left max-w-xl">
                   <h3 className="text-3xl font-bold text-white mb-6">FLEET PROFITS</h3>
@@ -55,16 +55,16 @@ export function Impact() {
           </motion.div>
           <div className="flex justify-center px-6">
             <SectionReveal className="max-w-[1200px] w-full" delay={0.2}>
-              <div className="glass-ui p-16 flex flex-col md:flex-row-reverse items-center justify-between gap-12 border-r-4 border-violet pointer-events-auto">
+              <div className="glass-ui p-16 flex flex-col md:flex-row items-center justify-between gap-12 border-l-4 border-violet pointer-events-auto">
                 <motion.div 
                   initial={{ scale: 2, opacity: 0, filter: "blur(20px)" }}
                   whileInView={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
                   transition={{ duration: 1.5, ease: "easeOut" }}
                   className="text-[clamp(80px,10vw,140px)] font-black text-violet leading-none"
                 >
-                  80%
+                  ~80%
                 </motion.div>
-                <div className="flex flex-col items-center md:items-end text-center md:text-right max-w-xl">
+                <div className="flex flex-col items-center md:items-start text-center md:text-left max-w-xl">
                   <h3 className="text-3xl font-bold text-white mb-6">SMALLER BATTERY</h3>
                   <p className="text-xl text-[#A0A8C0] font-light leading-relaxed">
                     Massive reduction in battery weight compared to full EVs. No payload sacrifice. No charging infrastructure required.

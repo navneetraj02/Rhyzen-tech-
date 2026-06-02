@@ -13,9 +13,9 @@ export function Problem() {
   const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1.2]);
 
   const stats = [
-    { label: "EMISSIONS", value: "34%", sub: "Trucks contribution to road CO2" },
-    { label: "FUEL COST", value: "60%", sub: "Dominates fleet operating costs" },
-    { label: "MARGINS", value: "05%", sub: "Thin industry profit buffers" },
+    { label: "EMISSIONS", value: "~50%", sub: "Of road transport carbon emissions in India come from commercial trucks." },
+    { label: "FUEL COST", value: "~45%", sub: "Of a fleet operator's monthly budget is spent purely on diesel." },
+    { label: "MARGINS", value: "~5%", sub: "Is the thin operating profit margin typical for logistics operators." },
   ];
 
   return (
@@ -29,7 +29,7 @@ export function Problem() {
         </SlideReveal>
         
         <SlideReveal direction="left" delay={0.2} className="text-[clamp(40px,6vw,80px)] font-bold text-center text-white mb-24 leading-tight justify-center">
-          Current alternatives fail in practice. Freight needs a realistic bridge.
+          Current alternatives fail in practice. Commercial trucking needs a realistic transition.
         </SlideReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16 w-full">

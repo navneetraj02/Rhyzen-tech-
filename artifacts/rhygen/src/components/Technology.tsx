@@ -36,7 +36,7 @@ export function Technology() {
           {[
             { label: "Drive Cycle Awareness", desc: "Adaptive power management mapped to unique Indian operating conditions.", direction: "left" },
             { label: "Predictive Optimization", desc: "Real-time energy split adjustments based on terrain and load telemetry.", direction: "up" },
-            { label: "Efficiency Loops", desc: "Continuous feedback system reducing fuel consumption by up to 30%.", direction: "right" }
+            { label: "Efficiency Loops", desc: "Continuous feedback system reducing fuel consumption by up to ~50%.", direction: "right" }
           ].map((item, i) => (
             <SlideReveal 
               key={i}
