@@ -102,14 +102,11 @@ export function Team() {
         </div>
 
         {/* Subtext below team members */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="mt-14 text-[17px] md:text-[20px] text-[#A0A8C0] font-light max-w-3xl text-center leading-relaxed tracking-wide px-6 border-t border-white/5 pt-8"
+        <div
+          className="mt-14 text-[17px] md:text-[20px] text-[#A0A8C0] font-light max-w-3xl text-center leading-relaxed tracking-wide px-6 border-t border-white/5 pt-8 z-20 relative"
         >
           Hybridization is not just a technology. It is the practical, necessary bridge to India's clean energy independence.
-        </motion.div>
+        </div>
       </div>
     </section>
   );
