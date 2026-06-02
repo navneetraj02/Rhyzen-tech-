@@ -118,14 +118,16 @@ export function Roadmap() {
     restDelta: 0.001 
   });
 
-  // Sync scroll progress with active milestone index, including the 15% scroll delay buffer
+  // Sync scroll progress with active milestone index, including the 15% scroll delay buffer and 15% end buffer
   useMotionValueEvent(smoothProgress, "change", (latest) => {
     if (latest < 0.15) {
       setActiveIndex(-1); // Intro Phase (Rhygen logo is visible, drawing line at 0)
+    } else if (latest >= 0.85) {
+      setActiveIndex(-2); // Outro Phase (No milestones shown, line is fully drawn)
     } else {
-      const journeyProgress = Math.min(0.999, (latest - 0.15) / 0.75); // Journey Phase maps [0.15, 0.90] to [0, 1]
+      const journeyProgress = (latest - 0.15) / 0.70; // Journey Phase maps [0.15, 0.85] to [0, 1]
       const idx = Math.floor(journeyProgress * milestones.length);
-      setActiveIndex(idx);
+      setActiveIndex(Math.min(milestones.length - 1, Math.max(0, idx)));
     }
   });
 
@@ -185,7 +187,7 @@ export function Roadmap() {
       const totalPinDistance = rect.height - window.innerHeight;
       
       let progress = 0;
-      if (totalPinDistance > 0) {
+      if (rect.top <= 0 && totalPinDistance > 0) {
         progress = Math.max(0, Math.min(1, scrolled / totalPinDistance));
       }
       
@@ -204,11 +206,11 @@ export function Roadmap() {
     };
   }, [scrollProgress]);
 
-  // Map scroll progress to horizontal translation [0px to -scrollRange] with 15% start buffer and 10% end buffer
-  const x = useTransform(smoothProgress, [0, 0.15, 0.9, 1.0], [0, 0, -scrollRange, -scrollRange], { clamp: true });
+  // Map scroll progress to horizontal translation [0px to -scrollRange] with 15% start buffer and 15% end buffer
+  const x = useTransform(smoothProgress, [0, 0.15, 0.85, 1.0], [0, 0, -scrollRange, -scrollRange], { clamp: true });
 
-  // Map pathLength (drawing stroke progress) starting exactly at 15% scroll and completing at 90% scroll
-  const pathLength = useTransform(smoothProgress, [0, 0.15, 0.9, 1.0], [0, 0, 1, 1], { clamp: true });
+  // Map pathLength (drawing stroke progress) starting exactly at 15% scroll and completing at 85% scroll
+  const pathLength = useTransform(smoothProgress, [0, 0.15, 0.85, 1.0], [0, 0, 1, 1], { clamp: true });
 
   return (
     <section id="roadmap" ref={containerRef} className="relative h-[700vh] bg-transparent">
@@ -278,7 +280,7 @@ export function Roadmap() {
               const nodeX = startX + (i + 1) * gap;
               const nodeY = centerY + (i % 2 === 0 ? -amplitude : amplitude);
               const isActive = i === activeIndex;
-              const isCompleted = i < activeIndex;
+              const isCompleted = activeIndex === -2 || (activeIndex >= 0 && i < activeIndex);
 
               return (
                 <div key={i} className="absolute inset-0 pointer-events-none">
@@ -286,7 +288,7 @@ export function Roadmap() {
                   <motion.div
                     animate={{
                       scale: isActive ? 1.3 : isCompleted ? 1.0 : 0.8,
-                      opacity: isActive ? 1.0 : isCompleted ? 0.75 : 0.25
+                      opacity: isActive ? 1.0 : isCompleted ? 0.75 : 0.0
                     }}
                     transition={{ duration: 0.4 }}
                     style={{
@@ -302,19 +304,19 @@ export function Roadmap() {
                   >
                     {isCompleted ? (
                       <Check className="w-3.5 h-3.5 text-black" strokeWidth={4} />
-                    ) : (
+                    ) : isActive ? (
                       <div 
                         className="w-1.5 h-1.5 rounded-full" 
-                        style={{ backgroundColor: isActive ? milestone.color : "rgba(255,255,255,0.2)" }}
+                        style={{ backgroundColor: milestone.color }}
                       />
-                    )}
+                    ) : null}
                   </motion.div>
 
                   {/* Horizontal milestone card fading and sliding in based on scroll state */}
                   <motion.div
                     animate={{
                       scale: isActive ? 1.05 : isCompleted ? 0.95 : 0.85,
-                      opacity: isActive ? 1.0 : isCompleted ? 0.5 : 0.15,
+                      opacity: activeIndex === -2 ? 0.0 : (isActive ? 1.0 : isCompleted ? 0.4 : 0.0),
                       y: isActive ? 0 : i % 2 === 0 ? -12 : 12
                     }}
                     transition={{ duration: 0.5, ease: "easeOut" }}
@@ -393,7 +395,7 @@ export function Roadmap() {
           <div className="relative z-10 flex flex-col justify-between h-[80%] gap-3">
             {milestones.map((milestone, i) => {
               const isActive = i === activeIndex;
-              const isCompleted = i < activeIndex;
+              const isCompleted = activeIndex === -2 || (activeIndex >= 0 && i < activeIndex);
               
               return (
                 <div key={i} className="flex gap-4 items-start py-1">
@@ -413,14 +415,17 @@ export function Roadmap() {
                         {milestone.number}
                       </motion.div>
                     ) : (
-                      <div className="w-4 h-4 rounded-full border border-white/20 bg-[#070710] opacity-40" />
+                      <div className="w-4 h-4 rounded-full border border-white/20 bg-[#070710] opacity-0 transition-opacity duration-300" />
                     )}
                   </div>
 
                   {/* Accordion Text Content */}
                   <div className="flex-1 flex flex-col justify-center min-h-[40px]">
                     <div className="flex items-center justify-between">
-                      <h4 className={`text-sm font-bold tracking-tight transition-all duration-300 ${isActive ? "text-white font-black text-base" : "text-white/30"}`}>
+                      <h4 
+                        className={`text-sm font-bold tracking-tight transition-all duration-300 ${isActive ? "text-white font-black text-base" : "text-white/30"}`}
+                        style={{ opacity: activeIndex === -2 ? 0.3 : (isActive ? 1.0 : isCompleted ? 0.3 : 0.0) }}
+                      >
                         {milestone.title}
                       </h4>
                       {isActive && (
