@@ -13,7 +13,6 @@ import { Traction } from "./components/Traction";
 import { Pledge } from "./components/Pledge";
 import { Roadmap } from "./components/Roadmap";
 import { Team } from "./components/Team";
-import { Vision } from "./components/Vision";
 import { BackedBy } from "./components/BackedBy";
 import { Contact } from "./components/Contact";
 import { Footer } from "./components/Footer";
@@ -46,7 +45,6 @@ function App() {
         <Pledge />
         <Roadmap />
         <Team />
-        <Vision />
         <BackedBy />
         <Contact />
         <Footer />
