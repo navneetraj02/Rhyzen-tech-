@@ -78,19 +78,22 @@ function ScrollMilestoneCard({
   const opacity = useTransform(
     scrollYProgress,
     [startAppear, fullyAppear],
-    [0, 1]
+    [0, 1],
+    { clamp: true }
   );
   
   const scale = useTransform(
     scrollYProgress,
     [startAppear, fullyAppear],
-    [0.75, 1]
+    [0.75, 1],
+    { clamp: true }
   );
 
   const yOffset = useTransform(
     scrollYProgress,
     [startAppear, fullyAppear],
-    [index % 2 === 0 ? -15 : 15, 0]
+    [index % 2 === 0 ? -15 : 15, 0],
+    { clamp: true }
   );
 
   return (
@@ -162,13 +165,15 @@ function ScrollMilestoneNode({
   const opacity = useTransform(
     scrollYProgress,
     [startAppear, fullyAppear],
-    [0, 1]
+    [0, 1],
+    { clamp: true }
   );
   
   const scale = useTransform(
     scrollYProgress,
     [startAppear, fullyAppear],
-    [0, 1.2]
+    [0, 1.2],
+    { clamp: true }
   );
 
   return (
@@ -258,7 +263,7 @@ export function Roadmap() {
     offset: ["start start", "end end"]
   });
 
-  const x = useTransform(scrollYProgress, [0, 1], [0, -scrollRange]);
+  const x = useTransform(scrollYProgress, [0, 1], [0, -scrollRange], { clamp: true });
 
   return (
     <section id="roadmap" ref={containerRef} className="relative h-[320vh] bg-transparent">
