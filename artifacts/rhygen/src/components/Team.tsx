@@ -103,7 +103,7 @@ export function Team() {
 
         {/* Subtext below team members */}
         <div
-          className="mt-14 text-[17px] md:text-[20px] text-[#A0A8C0] font-light max-w-3xl text-center leading-relaxed tracking-wide px-6 border-t border-white/5 pt-8 z-20 relative"
+          className="mt-6 text-[19px] md:text-[24px] text-slate-100 font-light max-w-4xl text-center leading-relaxed tracking-wide px-6 border-t border-white/10 pt-6 z-20 relative"
         >
           Hybridization is not just a technology. It is the practical, necessary bridge to India's clean energy independence.
         </div>

@@ -55,10 +55,8 @@ export function Footer() {
           </div>
 
           <div className="flex gap-12 text-sm text-white/40 font-medium">
-            <a href="#" className="hover:text-violet transition-colors">Privacy</a>
-            <a href="#" className="hover:text-violet transition-colors">Terms</a>
-            <a href="#" className="hover:text-violet transition-colors">LinkedIn</a>
-            <a href="#" className="hover:text-violet transition-colors">Twitter</a>
+            <a href="https://www.linkedin.com/company/rhygentech/" target="_blank" rel="noopener noreferrer" className="hover:text-violet transition-colors">LinkedIn</a>
+            <a href="https://x.com/RuntimeBRT/status/1999851228973703676?s=20" target="_blank" rel="noopener noreferrer" className="hover:text-violet transition-colors">Twitter</a>
           </div>
 
           <div className="text-white/20 text-xs font-mono text-center md:text-right">

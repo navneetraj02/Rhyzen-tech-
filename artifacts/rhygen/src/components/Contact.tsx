@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Mail, ArrowUpRight } from "lucide-react";
+import { Mail, Phone, MapPin, ArrowUpRight } from "lucide-react";
 
 export function Contact() {
   return (
@@ -27,11 +27,42 @@ export function Contact() {
                 Rhygen is actively engaging with fleet operators, CV manufacturers, and strategic partners to redefine freight economics.
               </p>
               
-              <div className="flex flex-col gap-6">
-                <a href="mailto:partners@rhygen.com" className="flex items-center gap-4 text-white text-2xl font-bold group/link">
-                  partners@rhygen.com
-                  <ArrowUpRight className="group-hover/link:translate-x-1 group-hover/link:-translate-y-1 transition-transform text-violet" />
-                </a>
+              <div className="flex flex-col gap-6 mt-4">
+                <div className="flex items-start gap-4 group">
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-cyan group-hover:border-cyan/30 group-hover:bg-white/[0.03] transition-all duration-300">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-wider text-white/40 mb-1">Email</span>
+                    <a href="mailto:rhygentech@gmail.com" className="text-white hover:text-cyan transition-colors font-medium text-lg">
+                      rhygentech@gmail.com
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 group">
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-violet group-hover:border-violet/30 group-hover:bg-white/[0.03] transition-all duration-300">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-wider text-white/40 mb-1">Contact Info</span>
+                    <a href="tel:+917488107947" className="text-white hover:text-violet transition-colors font-medium text-lg">
+                      7488107947
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 group">
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-cyan group-hover:border-cyan/30 group-hover:bg-white/[0.03] transition-all duration-300">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-wider text-white/40 mb-1">Address</span>
+                    <p className="text-white font-medium text-sm md:text-base leading-relaxed max-w-xs">
+                      504 Shivansh residency kiwale Pune 412101 Maharashtra.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
