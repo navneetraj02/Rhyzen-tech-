@@ -90,7 +90,7 @@ export function BackedBy() {
                 <img 
                   src={item.logo} 
                   alt={item.name} 
-                  className="max-h-full max-w-full object-contain grayscale brightness-200 contrast-125 opacity-70 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500"
+                  className="max-h-full max-w-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-500"
                 />
               </div>
               <div className="border-t border-white/5 pt-4">
