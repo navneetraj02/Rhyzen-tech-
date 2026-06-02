@@ -98,7 +98,17 @@ const milestones = [
 
 export function Roadmap() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrollRange, setScrollRange] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  // Path constants for curved timeline layout
+  const startX = 100;
+  const gap = 420;
+  const centerY = 340;
+  const amplitude = 150;
+  const endExtension = 150;
+  const totalWidth = startX + milestones.length * gap + endExtension;
 
   // Custom high-performance motion values for scroll observer
   const scrollProgress = useMotionValue(0);
@@ -108,16 +118,64 @@ export function Roadmap() {
     restDelta: 0.001 
   });
 
-  // Sync scroll animation value with React state active index
+  // Sync scroll progress with active milestone index, including the 15% scroll delay buffer
   useMotionValueEvent(smoothProgress, "change", (latest) => {
-    const idx = Math.min(
-      milestones.length - 1,
-      Math.floor(latest * milestones.length)
-    );
-    setActiveIndex(idx);
+    if (latest < 0.15) {
+      setActiveIndex(-1); // Intro Phase (Rhygen logo is visible, drawing line at 0)
+    } else {
+      const journeyProgress = Math.min(0.999, (latest - 0.15) / 0.75); // Journey Phase maps [0.15, 0.90] to [0, 1]
+      const idx = Math.floor(journeyProgress * milestones.length);
+      setActiveIndex(idx);
+    }
   });
 
-  // DOM scroll event listener to track top bounding rect in real time
+  // Generate smooth horizontal Bezier zigzag curve
+  const generatePath = () => {
+    let d = `M ${startX},${centerY}`;
+    
+    for (let i = 0; i < milestones.length; i++) {
+      const x = startX + (i + 1) * gap;
+      const y = centerY + (i % 2 === 0 ? -amplitude : amplitude);
+      
+      const prevX = startX + i * gap;
+      const prevY = i === 0 ? centerY : centerY + ((i - 1) % 2 === 0 ? -amplitude : amplitude);
+      
+      const cp1x = prevX + gap / 2;
+      const cp1y = prevY;
+      const cp2x = prevX + gap / 2;
+      const cp2y = y;
+      
+      d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x},${y}`;
+    }
+    
+    // Smooth curve back to the center Y axis at the end
+    const lastX = startX + milestones.length * gap;
+    const lastY = centerY + ((milestones.length - 1) % 2 === 0 ? -amplitude : amplitude);
+    const endX = lastX + endExtension;
+    
+    d += ` C ${lastX + (endExtension / 2)},${lastY} ${lastX + (endExtension / 2)},${centerY} ${endX},${centerY}`;
+    
+    return d;
+  };
+
+  const pathD = generatePath();
+
+  useEffect(() => {
+    const calculateScrollRange = () => {
+      if (scrollRef.current) {
+        setScrollRange(scrollRef.current.scrollWidth - window.innerWidth);
+      }
+    };
+    
+    const timer = setTimeout(calculateScrollRange, 100);
+    window.addEventListener("resize", calculateScrollRange);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", calculateScrollRange);
+    };
+  }, []);
+
+  // Custom DOM-based Scroll event observer using getBoundingClientRect
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -137,7 +195,7 @@ export function Roadmap() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
     
-    // Calibrate initially
+    // Calibrate position initially
     handleScroll();
     
     return () => {
@@ -146,16 +204,19 @@ export function Roadmap() {
     };
   }, [scrollProgress]);
 
-  // Transform progress into vertical timeline fill percentage
-  const fillHeight = useTransform(smoothProgress, [0, 1], ["0%", "100%"], { clamp: true });
+  // Map scroll progress to horizontal translation [0px to -scrollRange] with 15% start buffer and 10% end buffer
+  const x = useTransform(smoothProgress, [0, 0.15, 0.9, 1.0], [0, 0, -scrollRange, -scrollRange], { clamp: true });
+
+  // Map pathLength (drawing stroke progress) starting exactly at 15% scroll and completing at 90% scroll
+  const pathLength = useTransform(smoothProgress, [0, 0.15, 0.9, 1.0], [0, 0, 1, 1], { clamp: true });
 
   return (
-    <section id="roadmap" ref={containerRef} className="relative h-[600vh] bg-transparent">
+    <section id="roadmap" ref={containerRef} className="relative h-[700vh] bg-transparent">
       {/* Sticky viewport container */}
       <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-between py-10 z-10 bg-[#070710]">
         
-        {/* Header */}
-        <div className="max-w-[1440px] mx-auto px-6 w-full text-center mb-6 shrink-0 relative z-20">
+        {/* Static Header */}
+        <div className="max-w-[1440px] mx-auto px-6 w-full text-center mb-4 shrink-0 relative z-20">
           <div className="label-caps text-cyan mb-2">The Strategic Journey</div>
           <h2 className="text-[clamp(32px,5vw,64px)] font-black text-white uppercase tracking-tighter">
             THE <span className="text-violet">ROADMAP.</span>
@@ -163,186 +224,170 @@ export function Roadmap() {
         </div>
 
         {/* --- DESKTOP VIEWPORT --- */}
-        <div className="hidden md:flex flex-1 items-center max-w-[1200px] w-full mx-auto px-6 relative gap-12 my-4">
-          
-          {/* Left Column: Vertical Timeline */}
-          <div className="w-[40%] shrink-0 relative h-[420px] flex flex-col justify-between py-4">
-            
-            {/* Rhygen Starting Logo Emblem */}
-            <div className="absolute left-[24px] -top-12 -translate-x-1/2 w-10 h-10 bg-[#0c0d1b] border border-white/10 rounded-full flex items-center justify-center z-30 shadow-[0_0_15px_rgba(0,229,255,0.15)]">
+        <div className="hidden md:flex flex-1 items-center relative overflow-hidden my-4">
+          <motion.div 
+            ref={scrollRef}
+            className="h-[680px] px-[20vw] relative z-10"
+            style={{ x, width: `${totalWidth}px` }}
+          >
+            {/* SVG Canvas containing curved drawing path */}
+            <svg 
+              width={totalWidth} 
+              height={680} 
+              className="absolute inset-0 pointer-events-none z-0"
+            >
+              {/* Trace path (Faint background timeline line) */}
+              <path 
+                d={pathD} 
+                fill="none" 
+                stroke="rgba(255, 255, 255, 0.05)" 
+                strokeWidth={3} 
+              />
+              {/* Dynamic scroll-drawn horizontal curved zigzag line */}
+              <motion.path 
+                d={pathD} 
+                fill="none" 
+                stroke="url(#roadmap-grad)" 
+                strokeWidth={4} 
+                style={{ pathLength }} 
+                strokeLinecap="round"
+              />
+              <defs>
+                <linearGradient id="roadmap-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#00E5FF" />
+                  <stop offset="50%" stopColor="#5B4EE8" />
+                  <stop offset="100%" stopColor="#00E5FF" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* Starting Rhygen Logo Emblem (at X = 100, Y = 340) */}
+            <div 
+              style={{ left: `${startX}px`, top: `${centerY}px` }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-[#0c0d1b] border-2 border-white/20 rounded-full flex items-center justify-center z-30 shadow-[0_0_20px_rgba(0,229,255,0.2)]"
+            >
               <img 
                 src="/logo_square.png" 
-                alt="Rhygen" 
-                className="w-6 h-6 object-contain mix-blend-screen"
+                alt="Rhygen Start" 
+                className="w-9 h-9 object-contain mix-blend-screen"
               />
             </div>
 
-            {/* Timeline Tracks */}
-            <div className="absolute left-[24px] top-0 bottom-0 w-[3px] bg-white/5 z-0 -translate-x-1/2" />
-            <motion.div 
-              style={{ height: fillHeight }}
-              className="absolute left-[24px] top-0 w-[3px] bg-gradient-to-b from-cyan via-violet to-cyan z-10 -translate-x-1/2 shadow-[0_0_15px_rgba(0,229,255,0.3)]"
-            />
-
-            {/* Milestones Vertical Nodes */}
+            {/* Render Nodes and Milestones along the curved path */}
             {milestones.map((milestone, i) => {
+              const nodeX = startX + (i + 1) * gap;
+              const nodeY = centerY + (i % 2 === 0 ? -amplitude : amplitude);
               const isActive = i === activeIndex;
               const isCompleted = i < activeIndex;
-              
+
               return (
-                <div 
-                  key={i} 
-                  style={{ top: `${(i / (milestones.length - 1)) * 100}%` }}
-                  className="absolute left-[24px] -translate-y-1/2 w-full flex items-center z-20"
-                >
-                  {/* Node Circle */}
-                  <motion.div 
-                    animate={{ 
-                      scale: isActive ? 1.25 : 1,
-                      opacity: isActive ? 1 : isCompleted ? 0.7 : 0.35 
+                <div key={i} className="absolute inset-0 pointer-events-none">
+                  {/* Dynamic circular glowing node popping on scroll contact */}
+                  <motion.div
+                    animate={{
+                      scale: isActive ? 1.3 : isCompleted ? 1.0 : 0.8,
+                      opacity: isActive ? 1.0 : isCompleted ? 0.75 : 0.25
                     }}
-                    transition={{ duration: 0.3 }}
-                    className="absolute left-0 -translate-x-1/2 w-10 h-10 rounded-full bg-[#070710] border-2 flex items-center justify-center transition-all duration-300"
-                    style={{ 
+                    transition={{ duration: 0.4 }}
+                    style={{
+                      left: nodeX,
+                      top: nodeY,
+                      x: "-50%",
+                      y: "-50%",
                       borderColor: isActive ? milestone.color : isCompleted ? "#00E5FF" : "rgba(255,255,255,0.15)",
                       backgroundColor: isCompleted ? "#00E5FF" : "#070710",
-                      boxShadow: isActive ? `0 0 15px ${milestone.color}55` : "none"
+                      boxShadow: isActive ? `0 0 15px ${milestone.color}` : "none"
                     }}
+                    className="absolute w-6 h-6 rounded-full border-2 z-20 flex items-center justify-center transition-all duration-300"
                   >
                     {isCompleted ? (
-                      <Check className="w-5 h-5 text-black" strokeWidth={3} />
+                      <Check className="w-3.5 h-3.5 text-black" strokeWidth={4} />
                     ) : (
-                      <span className={`text-xs font-bold ${isActive ? "text-white" : "text-white/40"}`}>
-                        {milestone.number}
-                      </span>
+                      <div 
+                        className="w-1.5 h-1.5 rounded-full" 
+                        style={{ backgroundColor: isActive ? milestone.color : "rgba(255,255,255,0.2)" }}
+                      />
                     )}
                   </motion.div>
 
-                  {/* Horizontal Connect Node label */}
-                  <span 
-                    className={`absolute left-8 text-xs font-bold uppercase tracking-wider transition-colors duration-300 whitespace-nowrap ${
-                      isActive ? "text-white" : isCompleted ? "text-cyan/70" : "text-white/20"
-                    }`}
+                  {/* Horizontal milestone card fading and sliding in based on scroll state */}
+                  <motion.div
+                    animate={{
+                      scale: isActive ? 1.05 : isCompleted ? 0.95 : 0.85,
+                      opacity: isActive ? 1.0 : isCompleted ? 0.5 : 0.15,
+                      y: isActive ? 0 : i % 2 === 0 ? -12 : 12
+                    }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    style={{
+                      left: nodeX,
+                      top: i % 2 === 0 ? nodeY - 240 : nodeY + 25,
+                      x: "-50%"
+                    }}
+                    className="absolute w-[280px] md:w-[340px] z-10 pointer-events-auto"
                   >
-                    {milestone.shortTitle}
-                  </span>
+                    <div 
+                      className={`glass-ui p-6 rounded-2xl relative overflow-hidden group transition-all duration-500 border-l-4 ${
+                        isActive ? "bg-[#0c0d1b]/95 border-l-cyan" : "bg-[#0c0d1b]/80 border-l-white/20"
+                      }`}
+                      style={{ 
+                        borderLeftColor: (isActive || isCompleted) ? milestone.color : "rgba(255,255,255,0.1)",
+                        boxShadow: isActive ? `0 15px 30px rgba(0,0,0,0.5), 0 0 20px ${milestone.color}15` : "none"
+                      }}
+                    >
+                      {/* Number Watermark */}
+                      <span className="absolute -top-4 -right-4 text-7xl font-black text-white/[0.01] group-hover:text-white/[0.04] transition-colors pointer-events-none">
+                        {milestone.number}
+                      </span>
+
+                      {/* Status Tag */}
+                      <div 
+                        className="absolute top-0 left-0 px-3 py-1 rounded-br-lg text-[8px] font-black tracking-widest text-black uppercase"
+                        style={{ 
+                          backgroundColor: (isActive || isCompleted) ? milestone.color : "rgba(255,255,255,0.15)",
+                          color: (isActive || isCompleted) ? "#000" : "#fff"
+                        }}
+                      >
+                        {milestone.status}
+                      </div>
+
+                      {/* Highlight statistics grid inside active card */}
+                      <h4 className="text-lg font-bold text-white mb-2 group-hover:text-cyan transition-colors">{milestone.title}</h4>
+                      <p className="text-[#A0A8C0] font-light leading-relaxed text-xs md:text-sm whitespace-normal">
+                        {milestone.text}
+                      </p>
+
+                      {/* Expand details/highlights under active milestone */}
+                      {isActive && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-4"
+                        >
+                          {milestone.highlights.map((h, idx) => (
+                            <div key={idx} className="flex flex-col">
+                              <span className="text-[9px] uppercase tracking-wider text-white/40">{h.label}</span>
+                              <span className="text-sm font-black text-white" style={{ color: milestone.color }}>
+                                {h.value}
+                              </span>
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
                 </div>
               );
             })}
-          </div>
-
-          {/* Right Column: Premium HUD Storytelling Content Card */}
-          <div className="flex-1 relative h-[450px] flex items-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIndex}
-                initial={{ opacity: 0, y: 30, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -30, scale: 0.98 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="glass-ui w-full p-8 md:p-10 rounded-[32px] border-l-4 relative overflow-hidden bg-[#0c0d1b]/70 backdrop-blur-xl h-full flex flex-col justify-between"
-                style={{ 
-                  borderLeftColor: milestones[activeIndex].color,
-                  boxShadow: `0 20px 40px rgba(0,0,0,0.4), inset 0 0 40px rgba(255,255,255,0.01)`
-                }}
-              >
-                {/* HUD Grid Overlay */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
-
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-8 h-full relative z-10">
-                  {/* Left Col (Col Span 3): Text Content & Highlights */}
-                  <div className="md:col-span-3 flex flex-col justify-between h-full">
-                    <div>
-                      {/* Badge and Tag */}
-                      <div className="flex items-center gap-4">
-                        <span 
-                          className="px-3.5 py-1 rounded-full text-[9px] font-black tracking-widest text-black uppercase"
-                          style={{ backgroundColor: milestones[activeIndex].color }}
-                        >
-                          {milestones[activeIndex].status}
-                        </span>
-                        <span className="text-[9px] font-mono text-white/30 tracking-[3px] uppercase">
-                          MISSION STEP // 0{activeIndex + 1}
-                        </span>
-                      </div>
-                      
-                      <h3 className="text-3xl md:text-4xl font-black text-white mt-6 mb-4 tracking-tight leading-none uppercase">
-                        {milestones[activeIndex].title}
-                      </h3>
-                      
-                      <p className="text-[#A0A8C0] font-light leading-relaxed text-sm md:text-base">
-                        {milestones[activeIndex].text}
-                      </p>
-                    </div>
-
-                    {/* Milestone Highlight Statistics */}
-                    <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-6 mt-4">
-                      {milestones[activeIndex].highlights.map((highlight, idx) => (
-                        <div key={idx} className="flex flex-col">
-                          <span className="text-[10px] uppercase tracking-wider text-white/40 mb-1">{highlight.label}</span>
-                          <span 
-                            className="text-xl md:text-2xl font-black text-white"
-                            style={{ color: milestones[activeIndex].color }}
-                          >
-                            {highlight.value}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Right Col (Col Span 2): Systems Telemetry HUD Illustration */}
-                  <div className="md:col-span-2 hidden md:flex flex-col justify-center items-center p-6 bg-white/[0.01] rounded-2xl border border-white/5 relative overflow-hidden group/hud h-full select-none">
-                    <div 
-                      className="absolute inset-0 pointer-events-none opacity-5 transition-opacity duration-700" 
-                      style={{ 
-                        backgroundImage: `radial-gradient(circle at center, ${milestones[activeIndex].color} 0%, transparent 70%)` 
-                      }}
-                    />
-                    
-                    {/* Animated HUD Rotator */}
-                    <motion.div 
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                      className="w-28 h-28 rounded-full border border-dashed flex items-center justify-center relative mb-4"
-                      style={{ borderColor: `${milestones[activeIndex].color}33` }}
-                    >
-                      <div className="w-20 h-20 rounded-full border border-white/10 flex items-center justify-center" />
-                      <div className="w-12 h-12 rounded-full border border-dashed border-white/5 flex items-center justify-center" />
-                      <div 
-                        className="w-2.5 h-2.5 rounded-full absolute" 
-                        style={{ 
-                          backgroundColor: milestones[activeIndex].color,
-                          boxShadow: `0 0 10px ${milestones[activeIndex].color}`,
-                          top: '-5px',
-                          left: 'calc(50% - 5px)'
-                        }} 
-                      />
-                    </motion.div>
-
-                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-[2px]">TELEMETRY LOCKED</span>
-                    <span 
-                      className="text-xs font-black mt-1 uppercase tracking-widest"
-                      style={{ color: milestones[activeIndex].color }}
-                    >
-                      {milestones[activeIndex].status}
-                    </span>
-                    <span className="text-[8px] font-mono text-white/20 mt-3 max-w-[140px] text-center leading-normal">
-                      {milestones[activeIndex].details}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+          </motion.div>
         </div>
 
         {/* --- MOBILE VIEWPORT --- */}
         <div className="flex-1 md:hidden overflow-y-auto px-6 py-2 relative flex flex-col justify-center">
+          {/* Vertical indicator line */}
           <div className="absolute left-[38px] top-6 bottom-6 w-[2px] bg-white/5 z-0" />
           <motion.div 
             className="absolute left-[38px] top-6 w-[2px] bg-gradient-to-b from-cyan via-violet to-cyan z-0"
-            style={{ height: fillHeight }}
+            style={{ height: pathLength }}
           />
 
           <div className="relative z-10 flex flex-col justify-between h-[80%] gap-3">
