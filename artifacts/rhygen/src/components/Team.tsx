@@ -5,7 +5,7 @@ export function Team() {
     { 
       name: "Aditya Anand",
       role: "Co-Founder · Electrical Systems & Business", 
-      background: "B.Tech EE, IIT Bombay '26", 
+      background: "B.Tech + M.Tech EE, IIT Bombay '26", 
       tag: "HV ARCHITECTURE",
       image: "/aditya.png"
     },
@@ -38,8 +38,8 @@ export function Team() {
         </motion.div>
         
         <h2 className="text-[clamp(40px,6vw,100px)] font-black text-center text-white mb-32 tracking-tighter uppercase leading-[0.9]">
-          TECHNICAL <br/>
-          <span className="text-violet">FORMIDABLE.</span>
+          CORE <br/>
+          <span className="text-violet">ARCHITECTS.</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-full max-w-[1200px]">
