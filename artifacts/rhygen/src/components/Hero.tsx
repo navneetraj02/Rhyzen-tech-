@@ -12,6 +12,13 @@ export function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
 
+  const scrollToVideo = () => {
+    const element = document.getElementById("market");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <section id="hero" ref={containerRef} className="h-screen flex flex-col items-center justify-center text-center pointer-events-none">
       <motion.div 
@@ -20,16 +27,16 @@ export function Hero() {
       >
         <SectionReveal delay={0.2}>
           <motion.div className="label-caps text-cyan mb-12">
-            Intelligence in Motion
+            Engineering the Future of Logistics
           </motion.div>
         </SectionReveal>
 
         <div className="flex flex-col items-center mb-12">
-          <CharReveal className="heading-massive text-white" delay={0.5}>
-            INTELLIGENT
+          <CharReveal className="text-[clamp(28px,5.5vw,70px)] font-extrabold tracking-tighter text-white uppercase leading-[0.85]" delay={0.5}>
+            CARBON NEGATIVE
           </CharReveal>
-          <CharReveal className="heading-massive text-violet" delay={1.2}>
-            HYBRID.
+          <CharReveal className="text-[clamp(28px,5.5vw,70px)] font-extrabold tracking-tighter text-violet uppercase leading-[0.85] mt-2 md:mt-4" delay={1.2}>
+            HYBRID POWERTRAIN.
           </CharReveal>
         </div>
 
@@ -46,7 +53,10 @@ export function Hero() {
           transition={{ duration: 1.5, delay: 3.5, ease: [0.16, 1, 0.3, 1] }}
           className="flex gap-8 pointer-events-auto"
         >
-          <button className="px-10 py-5 rounded-full bg-white text-black font-bold uppercase tracking-[4px] text-[12px] hover:bg-cyan transition-all hover:scale-110 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+          <button 
+            onClick={scrollToVideo}
+            className="px-10 py-5 rounded-full bg-white text-black font-bold uppercase tracking-[4px] text-[12px] hover:bg-cyan transition-all hover:scale-110 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)] cursor-pointer"
+          >
             Explore Technology
           </button>
         </motion.div>
