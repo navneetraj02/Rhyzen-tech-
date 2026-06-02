@@ -3,7 +3,7 @@ import { SectionReveal } from "./Reveal";
 
 export function Pledge() {
   return (
-    <section className="min-h-screen flex items-center justify-center py-40 px-6 relative overflow-hidden bg-black">
+    <section className="min-h-[75vh] flex items-center justify-center pt-24 pb-12 px-6 relative overflow-hidden bg-black">
       
       {/* Cinematic Background Atmosphere */}
       <div className="absolute inset-0 pointer-events-none">

@@ -34,7 +34,7 @@ function App() {
       <VoiceMode isOpen={voiceOpen} onClose={() => setVoiceOpen(false)} />
       
       {/* Scrollable Content Overlay */}
-      <main className="relative z-10 w-full overflow-hidden">
+      <main className="relative z-10 w-full overflow-x-clip">
         <Hero />
         <Problem />
         <Solution />
