@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mic } from "lucide-react";
+import { X } from "lucide-react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Sphere, MeshDistortMaterial, Float, Environment } from "@react-three/drei";
 import * as THREE from "three";
@@ -51,53 +51,122 @@ interface VoiceModeProps {
 }
 
 export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
-  const [displayedText, setDisplayedText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   
   useEffect(() => {
+    let keepAliveInterval: any = null;
+
     if (isOpen) {
       setIsSpeaking(true);
-      setDisplayedText("");
+      setCurrentIndex(0);
       
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(SCRIPT);
         
-        // Select a smoother voice
-        const setBestVoice = () => {
+        const utterance = new SpeechSynthesisUtterance(SCRIPT);
+        utteranceRef.current = utterance; // Keep a strong reference in component to prevent GC!
+        (window as any)._activeUtterance = utterance; // Keep a strong reference on window object!
+
+        // Select the absolute best voice (prioritizing high-quality natural/human voices)
+        const selectVoice = () => {
           const voices = window.speechSynthesis.getVoices();
-          const smoothVoice = voices.find(v => 
-            v.name.includes("Google") || 
-            v.name.includes("Samantha") || 
-            v.name.includes("Premium") ||
-            v.name.includes("Natural")
-          );
-          if (smoothVoice) utterance.voice = smoothVoice;
+          const englishVoices = voices.filter(v => v.lang.startsWith("en"));
+          
+          // 1. Siri (macOS Siri voices sound fully human)
+          let bestVoice = englishVoices.find(v => v.name.toLowerCase().includes("siri"));
+          
+          // 2. Google US/UK English Natural/Premium
+          if (!bestVoice) {
+            bestVoice = englishVoices.find(v => 
+              v.name.toLowerCase().includes("google") && 
+              (v.name.includes("US English") || v.name.includes("UK English"))
+            );
+          }
+          
+          // 3. Samantha / Daniel / Premium / Natural / Enhanced
+          if (!bestVoice) {
+            bestVoice = englishVoices.find(v => 
+              v.name.toLowerCase().includes("samantha") ||
+              v.name.toLowerCase().includes("daniel") ||
+              v.name.toLowerCase().includes("premium") ||
+              v.name.toLowerCase().includes("natural") ||
+              v.name.toLowerCase().includes("enhanced")
+            );
+          }
+          
+          // 4. Default english voice
+          if (!bestVoice) {
+            bestVoice = englishVoices[0];
+          }
+          
+          // 5. Default system voice
+          if (!bestVoice) {
+            bestVoice = voices.find(v => v.default) || voices[0];
+          }
+          
+          if (bestVoice) {
+            utterance.voice = bestVoice;
+            console.log("SpeechSynthesis selected voice:", bestVoice.name);
+          }
         };
-        setBestVoice();
+
+        selectVoice();
         if (window.speechSynthesis.onvoiceschanged !== undefined) {
-          window.speechSynthesis.onvoiceschanged = setBestVoice;
+          window.speechSynthesis.onvoiceschanged = selectVoice;
         }
 
-        utterance.rate = 0.95;
-        utterance.pitch = 1.1; // Slightly smoother pitch
+        utterance.rate = 0.98;
+        utterance.pitch = 1.0; // Keep pitch at 1.0 to preserve natural voice quality
+
+        const clearKeepAlive = () => {
+          if (keepAliveInterval) {
+            clearInterval(keepAliveInterval);
+            keepAliveInterval = null;
+          }
+        };
+
+        // SpeechSynthesis timeout workaround (Pause and resume every 12 seconds to keep connection alive)
+        utterance.onstart = () => {
+          setIsSpeaking(true);
+          keepAliveInterval = setInterval(() => {
+            if (window.speechSynthesis.speaking) {
+              window.speechSynthesis.pause();
+              window.speechSynthesis.resume();
+            }
+          }, 12000);
+        };
         
         utterance.onboundary = (event) => {
           if (event.name === 'word') {
-            setDisplayedText(SCRIPT.substring(0, event.charIndex + event.charLength));
+            setCurrentIndex(event.charIndex + event.charLength);
           }
         };
 
         utterance.onend = () => {
           setIsSpeaking(false);
-          setDisplayedText(SCRIPT);
+          setCurrentIndex(SCRIPT.length);
+          clearKeepAlive();
+        };
+
+        utterance.onerror = (e) => {
+          console.error("SpeechSynthesis error:", e);
+          setIsSpeaking(false);
+          clearKeepAlive();
         };
 
         window.speechSynthesis.speak(utterance);
       }
     }
+
     return () => {
-      if (typeof window !== "undefined") window.speechSynthesis.cancel();
+      if (typeof window !== "undefined") {
+        window.speechSynthesis.cancel();
+      }
+      if (keepAliveInterval) {
+        clearInterval(keepAliveInterval);
+      }
     };
   }, [isOpen]);
 
@@ -114,7 +183,8 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
             <X size={40} />
           </button>
 
-          <div className="w-full h-[50vh] relative mb-12">
+          {/* Rotating orb canvas container with compressed height to prevent overlapping */}
+          <div className="w-full h-[260px] md:h-[320px] relative mb-6">
             <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
               <ambientLight intensity={0.5} />
               <pointLight position={[10, 10, 10]} intensity={2} />
@@ -138,16 +208,28 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
             </div>
           </div>
 
-          <div className="max-w-4xl px-12 text-center">
+          {/* Dialogue block max-width and font clamped sizes for perfect overlay and humanized presentation */}
+          <div className="max-w-4xl px-6 md:px-12 text-center z-20">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-[clamp(24px,4vw,40px)] text-white font-medium leading-relaxed tracking-tight"
+              className="text-[clamp(18px,2.2vw,28px)] text-white font-medium leading-relaxed tracking-tight max-w-3xl mx-auto"
             >
-              {displayedText || <span className="opacity-30">Initializing system...</span>}
+              {isSpeaking || currentIndex > 0 ? (
+                <>
+                  <span className="text-white transition-colors duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
+                    {SCRIPT.substring(0, currentIndex)}
+                  </span>
+                  <span className="text-white/20 transition-colors duration-300">
+                    {SCRIPT.substring(currentIndex)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-white/20">{SCRIPT}</span>
+              )}
             </motion.div>
             
-            <div className="mt-12 flex items-center justify-center gap-4 text-cyan/50 uppercase tracking-[6px] text-xs font-bold">
+            <div className="mt-8 flex items-center justify-center gap-4 text-cyan/50 uppercase tracking-[6px] text-xs font-bold">
               <span className="w-12 h-[1px] bg-cyan/20" />
               Rhygen Intelligence Core
               <span className="w-12 h-[1px] bg-cyan/20" />
