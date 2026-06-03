@@ -31,7 +31,7 @@
     -webkit-font-smoothing: antialiased;
     background-color: #070710;
     color: #FFFFFF;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   html {

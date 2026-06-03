@@ -213,7 +213,7 @@ export function Roadmap() {
   const pathLength = useTransform(smoothProgress, [0, 0.15, 0.85, 1.0], [0, 0, 1, 1], { clamp: true });
 
   return (
-    <section id="roadmap" ref={containerRef} className="relative h-[700vh] bg-transparent">
+    <section id="roadmap" ref={containerRef} className="relative h-[700vh] bg-transparent block p-0">
       {/* Sticky viewport container */}
       <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-between py-10 z-10 bg-[#070710]">
         
