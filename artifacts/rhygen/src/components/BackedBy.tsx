@@ -8,7 +8,7 @@ export function BackedBy() {
     },
     {
       name: "Emergent",
-      logo: "/logo_emergent.png",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Mercatus_Center_logo.svg/512px-Mercatus_Center_logo.svg.png",
     },
     {
       name: "IIT Bombay",

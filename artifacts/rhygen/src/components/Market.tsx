@@ -44,7 +44,7 @@ export function Market() {
         <SectionReveal delay={0.2} className="w-full aspect-[21/9] min-h-[450px] md:min-h-[600px] pointer-events-auto relative mb-16">
           <div className="glass-ui w-full h-full p-2 overflow-hidden border-white/5 relative group">
             {/* Cinematic Video Container */}
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors z-10" />
+            <div className="absolute inset-0 bg-black/20 transition-colors z-10" />
             <video 
               ref={videoRef}
               autoPlay 
@@ -54,7 +54,7 @@ export function Market() {
               preload="auto"
               className="w-full h-full object-cover rounded-2xl"
             >
-              <source src="/truckvideo.mp4" type="video/mp4" />
+              <source src="/exploded_truck.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             
