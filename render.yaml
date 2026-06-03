@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: rhygen
+    env: static
+    buildCommand: npm install -g pnpm && pnpm install && pnpm run build
+    staticPublishPath: artifacts/rhygen/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
