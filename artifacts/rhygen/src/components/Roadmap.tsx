@@ -105,8 +105,8 @@ export function Roadmap() {
   // Path constants for curved timeline layout
   const startX = 100;
   const gap = 420;
-  const centerY = 340;
-  const amplitude = 150;
+  const centerY = 370;
+  const amplitude = 110;
   const endExtension = 150;
   const totalWidth = startX + milestones.length * gap + endExtension;
 
@@ -226,16 +226,16 @@ export function Roadmap() {
         </div>
 
         {/* --- DESKTOP VIEWPORT --- */}
-        <div className="hidden md:flex flex-1 items-center relative overflow-hidden my-4">
+        <div className="hidden md:flex flex-1 items-center relative overflow-hidden my-2">
           <motion.div 
             ref={scrollRef}
-            className="h-[680px] px-[20vw] relative z-10"
+            className="h-[740px] px-[20vw] relative z-10"
             style={{ x, width: `${totalWidth}px` }}
           >
             {/* SVG Canvas containing curved drawing path */}
             <svg 
               width={totalWidth} 
-              height={680} 
+              height={740} 
               className="absolute inset-0 pointer-events-none z-0"
             >
               {/* Trace path (Faint background timeline line) */}
@@ -322,7 +322,7 @@ export function Roadmap() {
                     transition={{ duration: 0.5, ease: "easeOut" }}
                     style={{
                       left: nodeX,
-                      top: i % 2 === 0 ? nodeY - 240 : nodeY + 25,
+                      top: i % 2 === 0 ? nodeY - 230 : nodeY + 20,
                       x: "-50%"
                     }}
                     className="absolute w-[280px] md:w-[340px] z-10 pointer-events-auto"
