@@ -54,10 +54,12 @@ export function BackedBy() {
                 />
               </div>
               
-              {/* Monospaced Cap Text below logo */}
-              <span className="text-xs font-mono text-cyan/90 tracking-[2px] uppercase block">
-                {backer.name}
-              </span>
+              {/* Monospaced Cap Text below logo (only for IIT Bombay as requested) */}
+              {backer.name === "IIT Bombay" && (
+                <span className="text-xs font-mono text-cyan/90 tracking-[2px] uppercase block">
+                  {backer.name}
+                </span>
+              )}
             </motion.div>
           ))}
         </div>

@@ -43,7 +43,7 @@ function RotatingOrb({ isSpeaking }: { isSpeaking: boolean }) {
   );
 }
 
-const SCRIPT = "This is Rhygen. We aren't building a concept; we are building the bridge. Today, commercial trucks contribute fifty percent of all road transport carbon emissions in India. Long-haul logistics runs on diesel, consuming forty-five percent of fleet budgets and leaving operators with thin five-percent profit margins. Pure electric is a decades-away illusion. Rhygen solves this today. Rather than replacing engines, we retrofit existing five to eight liter inline-six diesel engines, making them smart, clean power sources. Our hybrid architecture combines this with a modular, thirty-two kilowatt-hour thermally safe battery, a permanent-magnet electric motor, and our AI Hybrid Control Unit brain. We require zero charging infrastructure, capture up to seventy percent of stopping energy through regenerative braking, and keep payload impact under four percent. The motor bolts directly to the transmission, providing sixty kilowatts of continuous power and two hundred and twenty Newton-meters of instant torque. On the road, this delivers a twenty-eight percent carbon dioxide reduction per kilometer, saves up to twenty percent fuel on highways through cylinder deactivation, and achieves up to a fifty percent overall emission reduction. This triples fleet profits. Backed by IIT Bombay's SINE incubator, gradCapital, Emergent Ventures, Lightspeed, and ARAI, Rhygen is the new standard.";
+const SCRIPT = "This is Rhygen. We aren't building a concept; we are building the bridge. Today, commercial trucks contribute fifty percent of all road transport carbon emissions in India. Long-haul logistics runs on diesel, consuming forty-five percent of fleet budgets and leaving operators with thin five-percent profit margins. Pure electric is a decades-away illusion. Rhygen solves this today. Rather than replacing engines, we retrofit existing diesel trucks, making them smart, clean power sources. Our hybrid architecture combines this with a modular, thirty-two kilowatt-hour thermally safe battery, a permanent-magnet electric motor, and our AI Hybrid Control Unit brain. We require zero charging infrastructure, capture up to seventy percent of stopping energy through regenerative braking, and keep payload impact under four percent. The motor bolts directly to the transmission, providing sixty kilowatts of continuous power and two hundred and twenty Newton-meters of instant torque. On the road, this delivers a twenty-eight percent carbon dioxide reduction per kilometer, saves up to twenty percent fuel on highways through cylinder deactivation, and achieves up to a fifty percent overall emission reduction. This triples fleet profits. Backed by IIT Bombay's SINE incubator, gradCapital, Emergent Ventures, Lightspeed, and ARAI, Rhygen is the new standard.";
 
 interface VoiceModeProps {
   isOpen: boolean;
@@ -53,7 +53,7 @@ interface VoiceModeProps {
 export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(84.936); // Pre-measured duration of the generated audio file
+  const [duration, setDuration] = useState(83.424); // Pre-measured duration of the generated audio file
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
 
     const handleEnded = () => {
       setIsSpeaking(false);
-      setCurrentTime(audio.duration || 84.936);
+      setCurrentTime(audio.duration || 83.424);
     };
 
     audio.addEventListener("timeupdate", handleTimeUpdate);

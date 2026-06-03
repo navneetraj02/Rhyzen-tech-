@@ -5,22 +5,22 @@ export function Traction() {
     {
       name: "gradCapital",
       logo: "/logo_gradcapital.png",
-      title: "gradCapital Atomic Grant",
-      value: "$4,000",
+      title: "",
+      value: "gradCapital Atomic Grant Recipient",
       desc: "Selected for early-stage deep-tech backing."
     },
     {
       name: "SINE",
       logo: "/logo_sine.png",
-      title: "SINE IoE Grant",
-      value: "INR 6 Lakhs",
-      desc: "Development grant from IIT Bombay's premier incubator."
+      title: "",
+      value: "SINE IoE Grant Recipient",
+      desc: "Pre-incubated in SINE."
     },
     {
       name: "Emergent Ventures",
       logo: "/logo_emergent.png",
-      title: "Emergent Ventures Grant",
-      value: "$17,000",
+      title: "",
+      value: "Emergent Ventures Fellow",
       desc: "Backed by the global philanthropic fund for hard tech."
     },
     {
@@ -34,14 +34,14 @@ export function Traction() {
       name: "AWS",
       logo: "/logo_aws.png",
       title: "AWS Campus Fund",
-      value: "3rd Place",
+      value: "2nd Runner-Up",
       desc: "Grand Challenge 2025 winner (3rd among 1,700 startups)."
     },
     {
       name: "ARAI",
       logo: "/logo_arai.png",
       title: "SIAT (ARAI) 2026",
-      value: "1st Prize",
+      value: "Winner",
       desc: "First prize winners at the prestigious ARAI automotive summit."
     },
     {
@@ -96,14 +96,18 @@ export function Traction() {
                     className="max-h-full max-w-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-500"
                   />
                 </div>
-                <div className="border-t border-white/5 pt-4">
-                  <span className="text-[10px] font-mono text-cyan/70 tracking-[2px] uppercase block mb-1">
-                    {item.title}
-                  </span>
-                  <h4 className="text-lg font-black text-white leading-tight mb-2">
-                    {item.value}
-                  </h4>
-                  <p className="text-[#A0A8C0] text-xs font-light leading-relaxed whitespace-normal">
+                <div className="border-t border-white/5 pt-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    {item.title && (
+                      <span className="text-[10px] font-mono text-cyan/70 tracking-[2px] uppercase block mb-1">
+                        {item.title}
+                      </span>
+                    )}
+                    <h4 className="text-sm font-black text-white leading-tight mb-2 whitespace-normal break-words">
+                      {item.value}
+                    </h4>
+                  </div>
+                  <p className="text-[#A0A8C0] text-xs font-light leading-relaxed whitespace-normal mt-2">
                     {item.desc}
                   </p>
                 </div>
