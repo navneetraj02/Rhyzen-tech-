@@ -105,8 +105,8 @@ export function Roadmap() {
   // Path constants for curved timeline layout
   const startX = 100;
   const gap = 420;
-  const centerY = 370;
-  const amplitude = 110;
+  const centerY = 290;
+  const amplitude = 80;
   const endExtension = 150;
   const totalWidth = startX + milestones.length * gap + endExtension;
 
@@ -229,13 +229,13 @@ export function Roadmap() {
         <div className="hidden md:flex flex-1 items-center relative overflow-hidden my-2">
           <motion.div 
             ref={scrollRef}
-            className="h-[740px] px-[20vw] relative z-10"
+            className="h-[580px] px-[20vw] relative z-10"
             style={{ x, width: `${totalWidth}px` }}
           >
             {/* SVG Canvas containing curved drawing path */}
             <svg 
               width={totalWidth} 
-              height={740} 
+              height={580} 
               className="absolute inset-0 pointer-events-none z-0"
             >
               {/* Trace path (Faint background timeline line) */}
@@ -322,13 +322,13 @@ export function Roadmap() {
                     transition={{ duration: 0.5, ease: "easeOut" }}
                     style={{
                       left: nodeX,
-                      top: i % 2 === 0 ? nodeY - 230 : nodeY + 20,
+                      top: i % 2 === 0 ? nodeY - 190 : nodeY + 15,
                       x: "-50%"
                     }}
                     className="absolute w-[280px] md:w-[340px] z-10 pointer-events-auto"
                   >
                     <div 
-                      className={`glass-ui p-6 rounded-2xl relative overflow-hidden group transition-all duration-500 border-l-4 ${
+                      className={`glass-ui p-4 md:p-5 rounded-2xl relative overflow-hidden group transition-all duration-500 border-l-4 ${
                         isActive ? "bg-[#0c0d1b]/95 border-l-cyan" : "bg-[#0c0d1b]/80 border-l-white/20"
                       }`}
                       style={{ 
@@ -353,8 +353,8 @@ export function Roadmap() {
                       </div>
 
                       {/* Highlight statistics grid inside active card */}
-                      <h4 className="text-lg font-bold text-white mb-2 group-hover:text-cyan transition-colors">{milestone.title}</h4>
-                      <p className="text-[#A0A8C0] font-light leading-relaxed text-xs md:text-sm whitespace-normal">
+                      <h4 className="text-base md:text-lg font-bold text-white mb-2 group-hover:text-cyan transition-colors">{milestone.title}</h4>
+                      <p className="text-[#A0A8C0] font-light leading-normal text-xs md:text-sm whitespace-normal">
                         {milestone.text}
                       </p>
 
@@ -363,7 +363,7 @@ export function Roadmap() {
                         <motion.div 
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
-                          className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-4"
+                          className="mt-3 pt-3 border-t border-white/5 grid grid-cols-2 gap-2"
                         >
                           {milestone.highlights.map((h, idx) => (
                             <div key={idx} className="flex flex-col">
