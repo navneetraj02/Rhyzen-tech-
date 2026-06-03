@@ -91,22 +91,11 @@ export function Traction() {
                 className="w-[280px] md:w-[320px] shrink-0 glass-ui p-6 rounded-2xl border border-white/10 flex flex-col justify-between hover:border-cyan/30 transition-all duration-500 group"
               >
                 <div className="flex items-center justify-center h-16 w-full mb-6">
-                  {item.video ? (
-                    <video 
-                      src={item.video} 
-                      autoPlay 
-                      loop 
-                      muted 
-                      playsInline 
-                      className="w-full h-full object-cover rounded-lg opacity-90 group-hover:opacity-100 transition-all duration-500"
-                    />
-                  ) : (
-                    <img 
-                      src={item.logo} 
-                      alt={item.name} 
-                      className="max-h-full max-w-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-500"
-                    />
-                  )}
+                  <img 
+                    src={item.logo} 
+                    alt={item.name} 
+                    className="max-h-full max-w-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-500"
+                  />
                 </div>
                 <div className="border-t border-white/5 pt-4 flex-1 flex flex-col justify-start gap-1">
                   <div>
