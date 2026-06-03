@@ -1,6 +1,6 @@
 import { motion, useMotionValue, useSpring, useTransform, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 const milestones = [
   {
@@ -210,7 +210,11 @@ export function Roadmap() {
   const x = useTransform(smoothProgress, [0, 0.15, 0.85, 1.0], [0, 0, -scrollRange, -scrollRange], { clamp: true });
 
   // Map pathLength (drawing stroke progress) starting exactly at 15% scroll and completing at 85% scroll
-  const pathLength = useTransform(smoothProgress, [0, 0.15, 0.85, 1.0], [0, 0, 1, 1], { clamp: true });
+  // Starts pre-drawn to 15.8% to connect the first milestone initially
+  const pathLength = useTransform(smoothProgress, [0, 0.15, 0.85, 1.0], [0.158, 0.158, 1, 1], { clamp: true });
+
+  // Map mobile path height progress as percentage
+  const mobilePathHeight = useTransform(smoothProgress, [0, 0.15, 0.85, 1.0], ["15.8%", "15.8%", "100%", "100%"], { clamp: true });
 
   return (
     <section id="roadmap" ref={containerRef} className="relative h-[700vh] bg-transparent block p-0">
@@ -389,7 +393,7 @@ export function Roadmap() {
           <div className="absolute left-[38px] top-6 bottom-6 w-[2px] bg-white/5 z-0" />
           <motion.div 
             className="absolute left-[38px] top-6 w-[2px] bg-gradient-to-b from-cyan via-violet to-cyan z-0"
-            style={{ height: pathLength }}
+            style={{ height: mobilePathHeight }}
           />
 
           <div className="relative z-10 flex flex-col justify-between h-[80%] gap-3">
@@ -476,6 +480,24 @@ export function Roadmap() {
             <span className="text-white/40 text-[9px] tracking-[4px] uppercase font-bold">Engineering the Future of Logistics</span>
           </div>
         </div>
+
+        {/* Scroll Down Indicator */}
+        <motion.div 
+          animate={{ 
+            opacity: (activeIndex === 5 || activeIndex === -2) ? 0 : 1,
+            y: (activeIndex === 5 || activeIndex === -2) ? 15 : 0
+          }}
+          transition={{ duration: 0.4 }}
+          className="absolute bottom-22 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-30 pointer-events-none"
+        >
+          <span className="text-[9px] tracking-[3px] uppercase font-bold text-white/50">Scroll Down</span>
+          <motion.div
+            animate={{ y: [0, 5, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChevronDown className="w-3.5 h-3.5 text-cyan" />
+          </motion.div>
+        </motion.div>
 
       </div>
     </section>
