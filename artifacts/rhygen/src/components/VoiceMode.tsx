@@ -58,7 +58,7 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
 
   useEffect(() => {
     // Instantiate high-quality pre-rendered neural voice file
-    const audio = new Audio("/rhygen_voice.mp3");
+    const audio = new Audio("/rhygen_voice.mp3?v=3");
     audioRef.current = audio;
 
     const handleTimeUpdate = () => {

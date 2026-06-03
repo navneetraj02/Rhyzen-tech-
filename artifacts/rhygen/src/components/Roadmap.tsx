@@ -279,7 +279,7 @@ export function Roadmap() {
             {milestones.map((milestone, i) => {
               const nodeX = startX + (i + 1) * gap;
               const nodeY = centerY + (i % 2 === 0 ? -amplitude : amplitude);
-              const isActive = i === activeIndex;
+              const isActive = i === activeIndex || (activeIndex === -1 && i === 0);
               const isCompleted = activeIndex === -2 || (activeIndex >= 0 && i < activeIndex);
 
               return (
@@ -394,7 +394,7 @@ export function Roadmap() {
 
           <div className="relative z-10 flex flex-col justify-between h-[80%] gap-3">
             {milestones.map((milestone, i) => {
-              const isActive = i === activeIndex;
+              const isActive = i === activeIndex || (activeIndex === -1 && i === 0);
               const isCompleted = activeIndex === -2 || (activeIndex >= 0 && i < activeIndex);
               
               return (

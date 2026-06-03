@@ -3,16 +3,16 @@ import { motion } from "framer-motion";
 export function BackedBy() {
   const backers = [
     {
-      name: "IIT Bombay",
-      logo: "/logo_iitb.svg",
-    },
-    {
       name: "gradCapital",
       logo: "/logo_gradcapital.png",
     },
     {
       name: "Emergent",
       logo: "/logo_emergent.png",
+    },
+    {
+      name: "IIT Bombay",
+      logo: "/logo_iitb.svg",
     },
     {
       name: "SINE",
