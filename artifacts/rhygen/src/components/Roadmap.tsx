@@ -123,7 +123,7 @@ export function Roadmap() {
     if (latest < 0.15) {
       setActiveIndex(-1); // Intro Phase (Rhygen logo is visible, drawing line at 0)
     } else if (latest >= 0.85) {
-      setActiveIndex(-2); // Outro Phase (No milestones shown, line is fully drawn)
+      setActiveIndex(milestones.length - 1); // Outro Phase (Keep last milestone active)
     } else {
       const journeyProgress = (latest - 0.15) / 0.70; // Journey Phase maps [0.15, 0.85] to [0, 1]
       const idx = Math.floor(journeyProgress * milestones.length);
