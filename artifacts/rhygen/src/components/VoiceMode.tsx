@@ -51,124 +51,68 @@ interface VoiceModeProps {
 }
 
 export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(35.9); // Pre-measured duration of the generated audio file
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
-    let keepAliveInterval: any = null;
+    // Instantiate high-quality pre-rendered neural voice file
+    const audio = new Audio("/rhygen_voice.mp3");
+    audioRef.current = audio;
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    const handleDurationChange = () => {
+      if (audio.duration) {
+        setDuration(audio.duration);
+      }
+    };
+
+    const handleEnded = () => {
+      setIsSpeaking(false);
+      setCurrentTime(audio.duration || 35.9);
+    };
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("durationchange", handleDurationChange);
+    audio.addEventListener("ended", handleEnded);
 
     if (isOpen) {
       setIsSpeaking(true);
-      setCurrentIndex(0);
-      
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(SCRIPT);
-        utteranceRef.current = utterance; // Keep a strong reference in component to prevent GC!
-        (window as any)._activeUtterance = utterance; // Keep a strong reference on window object!
-
-        // Select the absolute best voice (prioritizing high-quality natural/human voices)
-        const selectVoice = () => {
-          const voices = window.speechSynthesis.getVoices();
-          const englishVoices = voices.filter(v => v.lang.startsWith("en"));
-          
-          // 1. Siri (macOS Siri voices sound fully human)
-          let bestVoice = englishVoices.find(v => v.name.toLowerCase().includes("siri"));
-          
-          // 2. Google US/UK English Natural/Premium
-          if (!bestVoice) {
-            bestVoice = englishVoices.find(v => 
-              v.name.toLowerCase().includes("google") && 
-              (v.name.includes("US English") || v.name.includes("UK English"))
-            );
-          }
-          
-          // 3. Samantha / Daniel / Premium / Natural / Enhanced
-          if (!bestVoice) {
-            bestVoice = englishVoices.find(v => 
-              v.name.toLowerCase().includes("samantha") ||
-              v.name.toLowerCase().includes("daniel") ||
-              v.name.toLowerCase().includes("premium") ||
-              v.name.toLowerCase().includes("natural") ||
-              v.name.toLowerCase().includes("enhanced")
-            );
-          }
-          
-          // 4. Default english voice
-          if (!bestVoice) {
-            bestVoice = englishVoices[0];
-          }
-          
-          // 5. Default system voice
-          if (!bestVoice) {
-            bestVoice = voices.find(v => v.default) || voices[0];
-          }
-          
-          if (bestVoice) {
-            utterance.voice = bestVoice;
-            console.log("SpeechSynthesis selected voice:", bestVoice.name);
-          }
-        };
-
-        selectVoice();
-        if (window.speechSynthesis.onvoiceschanged !== undefined) {
-          window.speechSynthesis.onvoiceschanged = selectVoice;
-        }
-
-        utterance.rate = 0.98;
-        utterance.pitch = 1.0; // Keep pitch at 1.0 to preserve natural voice quality
-
-        const clearKeepAlive = () => {
-          if (keepAliveInterval) {
-            clearInterval(keepAliveInterval);
-            keepAliveInterval = null;
-          }
-        };
-
-        // SpeechSynthesis timeout workaround (Pause and resume every 12 seconds to keep connection alive)
-        utterance.onstart = () => {
-          setIsSpeaking(true);
-          keepAliveInterval = setInterval(() => {
-            if (window.speechSynthesis.speaking) {
-              window.speechSynthesis.pause();
-              window.speechSynthesis.resume();
-            }
-          }, 12000);
-        };
-        
-        utterance.onboundary = (event) => {
-          if (event.name === 'word') {
-            setCurrentIndex(event.charIndex + event.charLength);
-          }
-        };
-
-        utterance.onend = () => {
-          setIsSpeaking(false);
-          setCurrentIndex(SCRIPT.length);
-          clearKeepAlive();
-        };
-
-        utterance.onerror = (e) => {
-          console.error("SpeechSynthesis error:", e);
-          setIsSpeaking(false);
-          clearKeepAlive();
-        };
-
-        window.speechSynthesis.speak(utterance);
-      }
+      setCurrentTime(0);
+      audio.play().catch(err => {
+        console.warn("Audio autoplay blocked by browser, waiting for interaction", err);
+      });
     }
 
     return () => {
-      if (typeof window !== "undefined") {
-        window.speechSynthesis.cancel();
-      }
-      if (keepAliveInterval) {
-        clearInterval(keepAliveInterval);
-      }
+      audio.pause();
+      audio.currentTime = 0;
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("durationchange", handleDurationChange);
+      audio.removeEventListener("ended", handleEnded);
+      audioRef.current = null;
     };
   }, [isOpen]);
+
+  // Map audio timeline progress to character highlight boundaries in SCRIPT
+  let progress = 0;
+  if (currentTime > 0.5 && duration > 0.5) {
+    progress = Math.min(1, (currentTime - 0.5) / (duration - 1.0));
+  }
+  const currentIndex = Math.floor(progress * SCRIPT.length);
+
+  const handleClose = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsSpeaking(false);
+    onClose();
+  };
 
   return (
     <AnimatePresence>
@@ -179,7 +123,7 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070710]/98 backdrop-blur-3xl"
         >
-          <button onClick={onClose} className="absolute top-12 right-12 text-white/50 hover:text-white transition-colors z-[200] cursor-pointer pointer-events-auto">
+          <button onClick={handleClose} className="absolute top-12 right-12 text-white/50 hover:text-white transition-colors z-[200] cursor-pointer pointer-events-auto">
             <X size={40} />
           </button>
 
@@ -231,7 +175,7 @@ export function VoiceMode({ isOpen, onClose }: VoiceModeProps) {
             
             <div className="mt-8 flex items-center justify-center gap-4 text-cyan/50 uppercase tracking-[6px] text-xs font-bold">
               <span className="w-12 h-[1px] bg-cyan/20" />
-              Rhygen Intelligence Core
+              Rhygen Intelligence Core (Ultra-Realistic Neural Audio)
               <span className="w-12 h-[1px] bg-cyan/20" />
             </div>
           </div>
