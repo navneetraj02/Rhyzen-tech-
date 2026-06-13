@@ -388,15 +388,15 @@ export function Roadmap() {
         </div>
 
         {/* --- MOBILE VIEWPORT --- */}
-        <div className="flex-1 md:hidden overflow-y-auto px-6 py-2 relative flex flex-col justify-center">
+        <div className="flex-1 md:hidden overflow-y-auto px-6 pt-6 pb-24 relative flex flex-col justify-start gap-2">
           {/* Vertical indicator line */}
-          <div className="absolute left-[38px] top-6 bottom-6 w-[2px] bg-white/5 z-0" />
+          <div className="absolute left-[38px] top-6 bottom-16 w-[2px] bg-white/5 z-0" />
           <motion.div 
             className="absolute left-[38px] top-6 w-[2px] bg-gradient-to-b from-cyan via-violet to-cyan z-0"
             style={{ height: mobilePathHeight }}
           />
 
-          <div className="relative z-10 flex flex-col justify-between h-[80%] gap-3">
+          <div className="relative z-10 flex flex-col justify-start h-auto gap-3">
             {milestones.map((milestone, i) => {
               const isActive = i === activeIndex || (activeIndex === -1 && i === 0);
               const isCompleted = activeIndex === -2 || (activeIndex >= 0 && i < activeIndex);

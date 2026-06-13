@@ -16,7 +16,7 @@ function SpeedRays() {
   const { scrollYProgress } = useScroll();
   const velocity = useVelocity(scrollYProgress);
   const smoothVelocity = useSpring(velocity, { stiffness: 60, damping: 20 });
-  const count = 100; // Reduced count for performance
+  const count = 20; // Reduced count for performance
   
   const meshRef = useRef<THREE.Points>(null);
 
@@ -100,7 +100,7 @@ function HybridCore({ scrollProgress }: { scrollProgress: MotionValue<number> })
     <group ref={meshRef}>
       <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
         <mesh>
-          <icosahedronGeometry args={[1, 15]} />
+          <icosahedronGeometry args={[1, 4]} />
           <MeshDistortMaterial 
             color="#5B4EE8" 
             speed={2} 
@@ -135,7 +135,7 @@ function ProblemWorld({ scrollProgress }: { scrollProgress: MotionValue<number> 
 
   return (
     <group ref={groupRef}>
-      <Sparkles count={50} scale={10} size={1.5} speed={0.3} color="#00E5FF" opacity={0.3} />
+      <Sparkles count={20} scale={10} size={1.5} speed={0.3} color="#00E5FF" opacity={0.3} />
       {[...Array(10)].map((_, i) => (
         <mesh key={i} position={[Math.random() * 20 - 10, Math.random() * 10 - 5, -20]}>
           <boxGeometry args={[0.01, 0.01, 40]} />
@@ -197,7 +197,7 @@ export function MasterScene() {
           <ProblemWorld scrollProgress={scrollYProgress} />
           <SpeedRays />
           
-          <Stars radius={80} depth={40} count={2000} factor={4} saturation={0} fade speed={1} />
+          <Stars radius={80} depth={40} count={500} factor={4} saturation={0} fade speed={1} />
           <Environment preset="night" />
           <ContactShadows opacity={0.3} scale={20} blur={2.5} far={4} />
         </Suspense>

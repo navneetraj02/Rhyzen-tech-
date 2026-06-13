@@ -23,7 +23,7 @@ export function Hero() {
     <section id="hero" ref={containerRef} className="h-screen flex flex-col items-center justify-center text-center pointer-events-none">
       <motion.div 
         style={{ opacity, y }}
-        className="max-w-[1440px] w-full px-6 flex flex-col items-center"
+        className="max-w-[1440px] w-full px-6 flex flex-col items-center relative z-10 py-16 rounded-3xl bg-black/40 backdrop-blur-[2px] border border-white/5"
       >
         <SectionReveal delay={0.2}>
           <motion.div className="label-caps text-cyan mb-12">

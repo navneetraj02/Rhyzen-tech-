@@ -84,7 +84,7 @@ export function Team() {
 
                   {/* Member Info */}
                   <div className="relative z-10">
-                    <div className="label-caps text-cyan text-[9px] mb-4 opacity-100 tracking-[3px] font-black">{member.tag}</div>
+                    <div className="inline-block bg-[#00E5FF]/10 px-3 py-1.5 rounded-sm border border-[#00E5FF]/20 text-cyan text-[9px] mb-4 opacity-100 tracking-[3px] font-black">{member.tag}</div>
                     <h3 className="text-3xl font-black text-white mb-3 group-hover:text-cyan transition-colors">{member.name}</h3>
                     <div className="w-8 h-[2px] bg-cyan mb-6 group-hover:w-24 transition-all duration-700" />
                     <p className="text-white font-bold text-sm mb-2 drop-shadow-md">{member.role}</p>

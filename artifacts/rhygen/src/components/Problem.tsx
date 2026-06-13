@@ -22,7 +22,7 @@ export function Problem() {
     <section id="problem" ref={containerRef} className="min-h-screen py-32 flex flex-col items-center justify-center pointer-events-none">
       <motion.div 
         style={{ opacity, scale }}
-        className="max-w-[1200px] w-full px-6 flex flex-col items-center"
+        className="max-w-[1200px] w-full px-6 flex flex-col items-center relative z-10 py-16 rounded-3xl bg-black/40 backdrop-blur-[2px] border border-white/5"
       >
         <SlideReveal direction="left">
           <motion.div className="label-caps text-violet mb-8">The systemic challenge</motion.div>
@@ -53,21 +53,7 @@ export function Problem() {
           ))}
         </div>
 
-        {/* Ambient Moving Haze Cues */}
-        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{ 
-                x: [Math.random() * 100, -Math.random() * 100],
-                y: [Math.random() * 100, -Math.random() * 100],
-              }}
-              transition={{ duration: 10 + i * 5, repeat: Infinity, repeatType: "reverse" }}
-              className="absolute w-96 h-96 bg-violet/20 blur-[120px] rounded-full"
-              style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-            />
-          ))}
-        </div>
+        {/* Ambient Moving Haze Cues Removed for performance */}
       </motion.div>
     </section>
   );
