@@ -6,22 +6,43 @@ export function Team() {
       name: "Aditya Anand",
       role: "Co-Founder · Electrical Systems & Business", 
       background: "B.Tech + M.Tech EE, IIT Bombay '26", 
-      tag: "HV ARCHITECTURE",
+      badge: "IIT BOMBAY",
       image: "/aditya.png"
     },
     { 
       name: "Sajal Deolikar",
       role: "Co-Founder · Embedded Systems & Algorithms", 
       background: "B.Tech EE, IIT Bombay '25", 
-      tag: "CONTROL LOGIC",
+      badge: "IIT BOMBAY",
       image: "/sajal.png"
     },
     { 
       name: "Sannidhya Kaushal",
       role: "Co-Founder · Mechanical Design & Vehicle Integration", 
       background: "B.Tech EE, IIT Bombay '25", 
-      tag: "DYNAMICS & CAD",
+      badge: "IIT BOMBAY",
       image: "/sannidhya.jpg"
+    },
+    { 
+      name: "Devyanee Mundhe",
+      role: "Founding Team · Strategy Head", 
+      background: "Philosophy Hons, LSR '25", 
+      badge: "LSR",
+      image: "/devyanee.jpg"
+    },
+    { 
+      name: "Divakar Kumar",
+      role: "Founding Team · Operations Head", 
+      background: "B.Tech Civil, IIT Bombay '26", 
+      badge: "IIT BOMBAY",
+      image: "/divakar.jpg"
+    },
+    { 
+      name: "Kshitij Vaze",
+      role: "Founding Team · Embedded Engineer", 
+      background: "B.Tech EnTC PCCOE '25", 
+      badge: "PCCOE",
+      image: "/kshitij.jpg"
     },
   ];
 
@@ -84,7 +105,7 @@ export function Team() {
 
                   {/* Member Info */}
                   <div className="relative z-10">
-                    <div className="inline-block bg-[#00E5FF]/10 px-3 py-1.5 rounded-sm border border-[#00E5FF]/20 text-cyan text-[9px] mb-4 opacity-100 tracking-[3px] font-black">{member.tag}</div>
+
                     <h3 className="text-3xl font-black text-white mb-3 group-hover:text-cyan transition-colors">{member.name}</h3>
                     <div className="w-8 h-[2px] bg-cyan mb-6 group-hover:w-24 transition-all duration-700" />
                     <p className="text-white font-bold text-sm mb-2 drop-shadow-md">{member.role}</p>
@@ -93,9 +114,9 @@ export function Team() {
                 </div>
               </div>
 
-              {/* Founder / IITB Badge */}
+              {/* Founder / College Badge */}
               <div className="absolute -top-3 -right-3 px-4 py-2 bg-cyan text-black text-[10px] font-black tracking-widest rounded-lg shadow-[0_0_20px_rgba(0,229,255,0.4)] z-20 transition-all duration-500 group-hover:bg-white group-hover:scale-110">
-                IIT BOMBAY
+                {member.badge}
               </div>
             </motion.div>
           ))}
